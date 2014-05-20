@@ -42,6 +42,12 @@ Access all issues from the top Project menu, and access the issues of a specific
             <field name="default" eval="False"/>
             <field name="description">Issue assigned</field>
         </record>
+        <record id="mt_issue_reviewer" model="mail.message.subtype">
+            <field name="name">Reviewer Assigned</field>
+            <field name="res_model">project.issue</field>
+            <field name="default" eval="False"/>
+            <field name="description">Reviewer Assigned</field>
+        </record>
         <record id="mt_issue_blocked" model="mail.message.subtype">
             <field name="name">Issue Blocked</field>
             <field name="res_model">project.issue</field>

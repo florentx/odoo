@@ -87,6 +87,12 @@
             <field name="default" eval="False"/>
             <field name="description">Task Assigned</field>
         </record>
+        <record id="mt_task_reviewer" model="mail.message.subtype">
+            <field name="name">Reviever Assigned</field>
+            <field name="res_model">project.task</field>
+            <field name="default" eval="False"/>
+            <field name="description">Reviewer Assigned</field>
+        </record>
         <record id="mt_task_blocked" model="mail.message.subtype">
             <field name="name">Task Blocked</field>
             <field name="res_model">project.task</field>

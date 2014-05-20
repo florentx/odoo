@@ -279,7 +279,7 @@ class project(osv.osv):
         'state': fields.selection([('template', 'Template'),('draft','New'),('open','In Progress'), ('cancelled', 'Cancelled'),('pending','Pending'),('close','Closed')], 'Status', required=True,),
         'doc_count': fields.function(
             _get_attached_docs, string="Number of documents attached", type='integer'
-        )
+        ),
      }
 
     def _get_type_common(self, cr, uid, context):
@@ -563,6 +563,9 @@ class task(osv.osv):
         'user_id': {
             'project.mt_task_assigned': lambda self, cr, uid, obj, ctx=None: obj.user_id and obj.user_id.id,
         },
+        'reviewer_id': {
+            'project.mt_task_reviewer': lambda self, cr, uid, obj, ctx=None: obj.reviewer_id and obj.reviewer_id.id,
+        },
         'kanban_state': {
             'project.mt_task_blocked': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'blocked',
             'project.mt_task_ready': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'done',
@@ -785,6 +788,7 @@ class task(osv.osv):
                 'project.task': (lambda self, cr, uid, ids, c={}: ids, ['work_ids', 'remaining_hours', 'planned_hours'], 10),
                 'project.task.work': (_get_task, ['hours'], 10),
             }),
+        'reviewer_id': fields.many2one('res.users', 'Reviewer', select=True, track_visibility='onchange', help="Assign reviewer for the task."), 
         'user_id': fields.many2one('res.users', 'Assigned to', select=True, track_visibility='onchange'),
         'delegated_user_id': fields.related('child_ids', 'user_id', type='many2one', relation='res.users', string='Delegated To'),
         'partner_id': fields.many2one('res.partner', 'Customer'),
@@ -805,6 +809,7 @@ class task(osv.osv):
         'sequence': 10,
         'active': True,
         'user_id': lambda obj, cr, uid, ctx=None: uid,
+        'reviewer_id': lambda obj, cr, uid, ctx=None: uid,
         'company_id': lambda self, cr, uid, ctx=None: self.pool.get('res.company')._company_default_get(cr, uid, 'project.task', context=ctx),
         'partner_id': lambda self, cr, uid, ctx=None: self._get_default_partner(cr, uid, context=ctx),
     }

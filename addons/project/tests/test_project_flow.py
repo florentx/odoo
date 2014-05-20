@@ -135,7 +135,7 @@ class TestProjectFlow(TestProjectBase):
         self.assertEqual(res[0].get('create_uid'), uid,
                          'project: message_process: task should have been created by uid as alias_user_id is False on the alias')
         # Test: messages
-        self.assertEqual(len(task.message_ids), 3,
+        self.assertEqual(len(task.message_ids), 4,
                          'project: message_process: newly created task should have 2 messages: creation and email')
         self.assertEqual(task.message_ids[2].subtype_id.name, 'Task Created',
                          'project: message_process: first message of new task should have Task Created subtype')

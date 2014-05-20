@@ -55,6 +55,9 @@ class project_issue(osv.Model):
         'user_id': {
             'project_issue.mt_issue_assigned': lambda self, cr, uid, obj, ctx=None: obj.user_id and obj.user_id.id,
         },
+        'reviewer_id': {
+            'project_issue.mt_issue_reviewer': lambda self, cr, uid, obj, ctx=None: obj.reviewer_id and obj.reviewer_id.id,
+        },
         'kanban_state': {
             'project_issue.mt_issue_blocked': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'blocked',
             'project_issue.mt_issue_ready': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'done',
@@ -274,6 +277,7 @@ class project_issue(osv.Model):
         'day_close': fields.function(_compute_day, string='Days to Close', \
                                 multi='compute_day', type="float", store=True),
         'user_id': fields.many2one('res.users', 'Assigned to', required=False, select=1, track_visibility='onchange'),
+        'reviewer_id': fields.many2one('res.users', 'Reviewer', select=True, track_visibility='onchange', help="Assign reviewer for an issue."),
         'working_hours_open': fields.function(_compute_day, string='Working Hours to Open the Issue', \
                                 multi='compute_day', type="float", store=True),
         'working_hours_close': fields.function(_compute_day, string='Working Hours to Close the Issue', \
@@ -300,6 +304,7 @@ class project_issue(osv.Model):
         'kanban_state': 'normal',
         'date_last_stage_update': fields.datetime.now,
         'user_id': lambda obj, cr, uid, context: uid,
+        'reviewer_id': lambda obj, cr, uid, context: uid,
     }
 
     _group_by_full = {
