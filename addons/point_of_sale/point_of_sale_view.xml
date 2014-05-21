@@ -484,6 +484,7 @@
             <field name="arch" type="xml">
                 <group name="sale" position="inside">
                     <group name="pos" string="Point of Sale">
+                        <field name="pos_categ_id"/>
                         <field name="available_in_pos"/>
                         <field name="to_weight" />
                         <field name="income_pdt"/>
@@ -496,8 +497,6 @@
             </field>
         </record>
 
-        <!-- Categories tree view -->
-        <menuitem action="product.product_public_category_action" id="menu_product_public_category" parent="menu_point_of_sale_product" sequence="0" />
         <!-- END -->
 
         <menuitem name="Configuration" parent="menu_point_root"
@@ -918,7 +917,46 @@
                 </form>
             </field>
         </record>
-
+    
+        <record id="pos_categ_form_view" model="ir.ui.view">
+            <field name="name">pos.category.form</field>
+            <field name="model">pos.category</field>
+            <field name="arch" type="xml">
+                <form string="Point Of Sale Categories" version="7.0">
+                    <sheet>
+                        <field name="image_medium" widget='image' class="oe_avatar oe_right"/>
+                        <div class="oe_left">
+                            <group>
+                                <field name="name"/>
+                                <field name="parent_id"/>
+                                <field name="sequence"/>
+                            </group>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="pos_category_list_view" model="ir.ui.view">
+            <field name="name">pos.category.list</field>
+            <field name="model">pos.category</field>
+            <field name="arch" type="xml">
+                <tree string="Point Of Sale Categories">
+                    <field name="sequence" invisible="1"/>
+                    <field name="complete_name"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="pos_category_action_form" model="ir.actions.act_window">
+            <field name="name">Product Categories</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pos.category</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="pos_category_list_view"/>
+        </record>
+        
+        <menuitem action="pos_category_action_form" id="menu_product_pos_category" parent="menu_point_of_sale_product" sequence="0" />
 
     </data>
 </openerp>

@@ -256,9 +256,5 @@ parameter) will see those record just disappear.
             <field name="sale_ok" eval="False"/>
         </record>
 
-        <!-- Product Public Categories -->
-        <record id="categ_others" model="product.public.category">
-            <field name="name">Others</field>
-        </record>
     </data>
 </openerp>

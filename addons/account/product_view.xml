@@ -37,6 +37,7 @@
                     <page string="Accounting">
                         <group name="properties">
                             <group>
+                                <field name="categ_id"/>
                                 <field name="property_account_income" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]"/>
                                 <field name="taxes_id" colspan="2" widget="many2many_tags"/>
                             </group>

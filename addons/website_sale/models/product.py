@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.osv import osv, fields
+from openerp import tools
 
 class product_attribue(osv.Model):
     # TODO merge product.attribute, mrp.properties product_manufacturer_attributes
@@ -61,6 +62,67 @@ class product_pricelist(osv.Model):
         'code': fields.char('Promotional Code'),
     }
 
+class product_public_category(osv.Model):
+    _name = "product.public.category"
+    _description = "Website Category"
+    
+    def name_get(self, cr, uid, ids, context=None):
+        if not len(ids):
+            return []
+        reads = self.read(cr, uid, ids, ['name','parent_id'], context=context)
+        res = []
+        for record in reads:
+            name = record['name']
+            if record['parent_id']:
+                name = record['parent_id'][1]+' / '+name
+            res.append((record['id'], name))
+        return res
+
+    def _name_get_fnc(self, cr, uid, ids, prop, unknow_none, context=None):
+        res = self.name_get(cr, uid, ids, context=context)
+        return dict(res)
+
+    def _get_image(self, cr, uid, ids, name, args, context=None):
+        result = dict.fromkeys(ids, False)
+        for obj in self.browse(cr, uid, ids, context=context):
+            result[obj.id] = tools.image_get_resized_images(obj.image)
+        return result
+    
+    def _set_image(self, cr, uid, id, name, value, args, context=None):
+        return self.write(cr, uid, [id], {'image': tools.image_resize_image_big(value)}, context=context)
+
+    _columns = {
+        'name': fields.char('Name', required=True, translate=True),
+        'complete_name': fields.function(_name_get_fnc, type="char", string='Name'),
+        'parent_id': fields.many2one('product.public.category','Parent Category', select=True),
+        'child_id': fields.one2many('product.public.category', 'parent_id', string='Children Categories'),
+        'template_id': fields.many2many('product.template', 'website_categ_rel', 'public_categ_id', 'template_id', 'Template Name'),
+        'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of product categories."),
+        
+        # NOTE: there is no 'default image', because by default we don't show thumbnails for categories. However if we have a thumbnail
+        # for at least one category, then we display a default image on the other, so that the buttons have consistent styling.
+        # In this case, the default image is set by the js code.
+        # NOTE2: image: all image fields are base64 encoded and PIL-supported
+        'image': fields.binary("Image",
+            help="This field holds the image used as image for the cateogry, limited to 1024x1024px."),
+        'image_medium': fields.function(_get_image, fnct_inv=_set_image,
+            string="Medium-sized image", type="binary", multi="_get_image",
+            store={
+                'product.public.category': (lambda self, cr, uid, ids, c={}: ids, ['image'], 10),
+            },
+            help="Medium-sized image of the category. It is automatically "\
+                 "resized as a 128x128px image, with aspect ratio preserved. "\
+                 "Use this field in form views or some kanban views."),
+        'image_small': fields.function(_get_image, fnct_inv=_set_image,
+            string="Smal-sized image", type="binary", multi="_get_image",
+            store={
+                'product.public.category': (lambda self, cr, uid, ids, c={}: ids, ['image'], 10),
+            },
+            help="Small-sized image of the category. It is automatically "\
+                 "resized as a 64x64px image, with aspect ratio preserved. "\
+                 "Use this field anywhere a small image is required."),
+    }
+
 class product_template(osv.Model):
     _inherit = ["product.template", "website.seo.metadata"]
     _order = 'website_published desc, website_sequence desc, name'
@@ -73,6 +135,7 @@ class product_template(osv.Model):
         return res
 
     _columns = {
+        'public_categ_id': fields.many2many('product.public.category', 'website_categ_rel', 'template_id', 'public_categ_id', string="Website Category"),
         'attribute_lines': fields.one2many('product.attribute.line', 'product_tmpl_id', 'Product attributes'),
         # TODO FIXME tde: when website_mail/mail_thread.py inheritance work -> this field won't be necessary
         'website_message_ids': fields.one2many(
