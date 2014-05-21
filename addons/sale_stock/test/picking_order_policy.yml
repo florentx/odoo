@@ -96,13 +96,8 @@
   !python {model: sale.order}: |
     from datetime import datetime, timedelta
     from dateutil.relativedelta import relativedelta
-<<<<<<< TREE
     from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
     sale_order = self.browse(cr, uid, ref("sale_order_service"))
-=======
-    from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, float_compare
-    sale_order = self.browse(cr, uid, ref("sale.sale_order_6"))
->>>>>>> MERGE-SOURCE
     assert sale_order.picking_ids, "Delivery order is not created."
     for picking in sale_order.picking_ids:
       assert picking.state == "auto" or "confirmed", "Delivery order should be in 'Waitting Availability' state."
@@ -127,11 +122,6 @@
          assert move.product_packaging.id == order_line.product_packaging.id,"Product packaging is not correspond."
          assert move.partner_id.id == order_line.address_allotment_id.id or sale_order.partner_shipping_id.id,"Address is not correspond"
          #assert move.location_id.id == location_id,"Source Location is not correspond."
-<<<<<<< TREE
-=======
-         #assert move.location_dest_id == output_id,"Destination Location is not correspond."
-         assert float_compare(move.price_unit, order_line.product_id.standard_price or 0.0, precision_digits=2) == 0, "Price Unit is not correspond"
->>>>>>> MERGE-SOURCE
 -
   Now, I dispatch delivery order.
 -
@@ -168,12 +158,8 @@
   I check the invoice details after dispatched delivery.
 -
   !python {model: sale.order}: |
-<<<<<<< TREE
-    order = self.browse(cr, uid, ref("sale_order_service"))
-=======
     from openerp.tools import float_compare
-    order = self.browse(cr, uid, ref("sale.sale_order_6"))
->>>>>>> MERGE-SOURCE
+    order = self.browse(cr, uid, ref("sale_order_service"))
     assert order.invoice_ids, "Invoice is not created."
     ac = order.partner_invoice_id.property_account_receivable.id
     journal_ids = self.pool.get('account.journal').search(cr, uid, [('type', '=', 'sale'), ('company_id', '=', order.company_id.id)])
