@@ -31,6 +31,9 @@ import openerp.exceptions
 from openerp.osv import fields,osv, expression
 from openerp.osv.orm import browse_record
 from openerp.tools.translate import _
+import hashlib
+import urllib2
+import base64
 
 _logger = logging.getLogger(__name__)
 
@@ -188,9 +191,21 @@ class res_users(osv.osv):
     }
 
     def on_change_login(self, cr, uid, ids, login, context=None):
+        value = {}
+        if login:
+            hash = hashlib.md5(login.lower()).hexdigest()
+            url = "http://www.gravatar.com/avatar/" + hash
+            try:
+                if urllib2.urlopen(urllib2.Request(url + "?d=404")):
+                   image_content = urllib2.urlopen(url + "?s=128").read() 
+                   gravatar_image = base64.b64encode(image_content)
+                   value['image'] = gravatar_image
+            except:
+                _logger.info("Gravatar not found on Web!")
+
         if login and tools.single_email_re.match(login):
-            return {'value': {'email': login}}
-        return {}
+            value['email'] = login
+        return {'value': value}
 
     def onchange_state(self, cr, uid, ids, state_id, context=None):
         partner_ids = [user.partner_id.id for user in self.browse(cr, uid, ids, context=context)]
