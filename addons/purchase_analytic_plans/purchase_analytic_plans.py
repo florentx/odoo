@@ -20,7 +20,8 @@
 ##############################################################################
 
 from openerp.osv import fields, osv
-
+from lxml import etree
+from openerp.osv.orm import setup_modifiers
 
 class purchase_order_line(osv.osv):
     _name='purchase.order.line'
@@ -39,5 +40,13 @@ class purchase_order(osv.osv):
         res['analytics_id'] = order_line.analytics_id.id
         return res
 
-
+class account_analytic_plan_instance(osv.osv):
+    _name = "account.analytic.plan.instance"
+    _inherit="account.analytic.plan.instance"
+    
+    def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        res = super(account_analytic_plan_instance, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar,submenu=False)
+        nodes = res['fields']['account_ids']['views']['tree']['fields']['analytic_account_id']
+        nodes['context'].update({'model': context.get('model',False)})
+        return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

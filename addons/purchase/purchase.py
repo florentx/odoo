@@ -25,6 +25,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from operator import attrgetter
 from openerp.tools.safe_eval import safe_eval as eval
+from lxml import etree
+from openerp.osv.orm import setup_modifiers
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
@@ -223,7 +225,7 @@ class purchase_order(osv.osv):
         'invoiced': fields.function(_invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice has been paid"),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced', type='float'),
         'invoice_method': fields.selection([('manual','Based on Purchase Order lines'),('order','Based on generated draft invoice'),('picking','Based on incoming shipments')], 'Invoicing Control', required=True,
-            readonly=True, states={'draft':[('readonly',False)], 'sent':[('readonly',False)]},
+            readonly=True, states={'draft':[('readonly',False)], 'sent':[('readonly',False)],'bid':[('readonly',False)]},
             help="Based on Purchase Order lines: place individual lines in 'Invoice Control / On Purchase Order lines' from where you can selectively create an invoice.\n" \
                 "Based on generated invoice: create a draft invoice you can validate later.\n" \
                 "Based on incoming shipments: let you create an invoice when receptions are validated."
@@ -500,6 +502,8 @@ class purchase_order(osv.osv):
             if not po.order_line:
                 raise osv.except_osv(_('Error!'),_('You cannot confirm a purchase order without any purchase order line.'))
             for line in po.order_line:
+                if (line.product_id.type == 'service' and po.invoice_method == 'picking'):
+                    raise osv.except_osv(_('Error!'),_("You are trying to buy a product(s) of type 'Service' and you control invoices on incoming shipments. Please change the invoicing control in the Incoming Shipments & Invoices tab or create a separate request for quotation for this kind of product."))
                 if line.state=='draft':
                     todo.append(line.id)        
         self.pool.get('purchase.order.line').action_confirm(cr, uid, todo, context)
@@ -1439,7 +1443,23 @@ class account_invoice_line(osv.Model):
             'Purchase Order Line', ondelete='set null', select=True,
             readonly=True),
     }
-
+    
+class account_analytic_account(osv.Model):
+    _name = "account.analytic.account"
+    _inherit = "account.analytic.account"
+    
+    def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        if context is None:context = {}
+        res = super(account_analytic_account, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=False)
+        if context.get('model', False) == 'purchase.order.line':
+            doc = etree.XML(res['arch'])
+            nodes = doc.xpath("//field[@name='partner_id']")
+            for node in nodes:
+                node.set('string', _("Contact"))
+                setup_modifiers(node, res['fields']['partner_id'])
+            res['arch'] = etree.tostring(doc)
+        return res
+    
 class product_product(osv.osv):
     _inherit = "product.product"
 
