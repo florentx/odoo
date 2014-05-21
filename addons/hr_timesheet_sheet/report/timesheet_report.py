@@ -35,7 +35,7 @@ class timesheet_report(osv.osv):
         'date': fields.date('Date', readonly=True),
         'name': fields.char('Description', size=64,readonly=True),
         'product_id' : fields.many2one('product.product', 'Product'),
-        'general_account_id' : fields.many2one('account.account', 'General Account', readonly=True),
+        'general_account_id' : fields.many2one('account.account', 'Financial Account', readonly=True),
         'user_id': fields.many2one('res.users', 'User',readonly=True),
         'to_invoice': fields.many2one('hr_timesheet_invoice.factor', 'Type of Invoicing',readonly=True),
         'account_id': fields.many2one('account.analytic.account', 'Analytic Account',readonly=True),

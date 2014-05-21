@@ -166,14 +166,19 @@ class project(osv.osv):
     def unlink(self, cr, uid, ids, context=None):
         alias_ids = []
         mail_alias = self.pool.get('mail.alias')
+        analytic_account_obj = self.pool.get('account.analytic.account')
+        analytic_account = False
         for proj in self.browse(cr, uid, ids, context=context):
             if proj.tasks:
                 raise osv.except_osv(_('Invalid Action!'),
                                      _('You cannot delete a project containing tasks. You can either delete all the project\'s tasks and then delete the project or simply deactivate the project.'))
             elif proj.alias_id:
                 alias_ids.append(proj.alias_id.id)
+            analytic_account = proj.analytic_account_id
         res = super(project, self).unlink(cr, uid, ids, context=context)
         mail_alias.unlink(cr, uid, alias_ids, context=context)
+        if not analytic_account.line_ids:
+            analytic_account_obj.unlink(cr, uid, [analytic_account.id], context=context)
         return res
 
     def _get_attached_docs(self, cr, uid, ids, field_name, arg, context):
@@ -1225,13 +1230,21 @@ class account_analytic_account(osv.osv):
                 vals_for_project['type'] = account.type
             self.project_create(cr, uid, account.id, vals_for_project, context=context)
         return super(account_analytic_account, self).write(cr, uid, ids, vals, context=context)
+        
+    def _exist_project_documents(self, project, context=None):
+        if project.task_ids:
+            return True
+        return False
 
-    def unlink(self, cr, uid, ids, *args, **kwargs):
+    def unlink(self, cr, uid, ids, context=None):
         project_obj = self.pool.get('project.project')
-        analytic_ids = project_obj.search(cr, uid, [('analytic_account_id','in',ids)])
-        if analytic_ids:
-            raise osv.except_osv(_('Warning!'), _('Please delete the project linked with this account first.'))
-        return super(account_analytic_account, self).unlink(cr, uid, ids, *args, **kwargs)
+        proj_ids = project_obj.search(cr, uid, [('analytic_account_id', 'in', ids)])
+        for project in project_obj.browse(cr, uid, proj_ids, context=context):
+            if not self._exist_project_documents(project, context):
+                project_obj.unlink(cr, uid, proj_ids, context=context)
+            else:
+                raise osv.except_osv(_('Warning!'), _('Please delete the project linked with this account first.'))
+        return super(account_analytic_account, self).unlink(cr, uid, ids, context=context)
 
     def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
         if args is None:

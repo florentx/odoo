@@ -516,6 +516,11 @@ class account_analytic_account(osv.Model):
         res = super(account_analytic_account, self)._trigger_project_creation(cr, uid, vals, context=context)
         return res or (vals.get('use_issues') and not 'project_creation_in_progress' in context)
 
+    def _exist_project_documents(self, project, context=None):
+        res = super(account_analytic_account, self)._exist_project_documents(project, context)
+        if not res and not project.issue_ids:
+            return res
+        return True
 
 class project_project(osv.Model):
     _inherit = 'project.project'
