@@ -17,7 +17,7 @@
         <!-- Invoice for Direct Marketing -->
 
         <record id="test_crm_sale_invoice_1" model="account.invoice">
-            <field name="currency_id" ref="base.EUR"/>
+            <field name="currency_id" ref="base.USD"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="partner_id" ref="base.res_partner_1"/>
             <field name="journal_id" ref="account.sales_journal"/>
@@ -65,7 +65,7 @@
         <!-- Invoice for Indirect Marketing -->
 
         <record id="test_crm_sale_invoice_2" model="account.invoice">
-            <field name="currency_id" ref="base.EUR"/>
+            <field name="currency_id" ref="base.USD"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="partner_id" ref="base.res_partner_1"/>
             <field name="journal_id" ref="account.sales_journal"/>
