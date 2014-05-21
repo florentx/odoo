@@ -193,6 +193,8 @@ class Website(openerp.addons.web.controllers.main.Home):
 
         view = request.registry.get("ir.ui.view")
         views = view._views_get(request.cr, request.uid, xml_id, context=request.context)
+        v_model, custom_css_id = imd.get_object_reference(request.cr, request.uid, 'website', 'custom_css')
+        views.append(view.browse(request.cr, request.uid, custom_css_id, context=request.context))
         done = {}
         result = []
         for v in views:

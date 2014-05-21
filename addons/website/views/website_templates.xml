@@ -11,9 +11,62 @@
     <link rel="stylesheet" href='/website/static/src/css/website.css' t-ignore="true"/>
 </template>
 
+<template id="website.custom_css" name="Custom CSS">
+    <style>
+        /* Add Your CSS Here */
+        /* Below given some sample CSS wrapped in comment */
+        
+        /* Remove this line
+        
+        .navbar-default{
+            background-color: #7c7bad;
+            border-width: 0px;
+            color: white;
+        }
+        .navbar-default .navbar-nav &gt; li &gt; a {
+            color: #fff;
+        }
+        .navbar-default .navbar-nav &gt; .active  &gt; a{
+            background-color: #fff;
+            color:#7c7bad;
+        }
+        .navbar-default .navbar-brand {
+            color: #fff;
+        }
+        
+        a,.btn-link{
+            color:#7c7bad;
+        }
+        a:hover,.btn-link:hover{
+            color:#5f5e97;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: #7c7bad;
+            border-color: #7c7bad;
+        }
+        .btn-primary:hover, .btn-primary:focus,.btn-primary:active {
+            background-color: #5f5e97;
+            border-color: #5f5e97;
+        }
+        
+        .pagination &gt; li &gt; a {
+            color: #7c7bad;
+        }
+        .pagination &gt; .active &gt; a {
+            background-color: #7c7bad;
+            border-color: #7c7bad;
+        }
+        
+        Remove this line  */
+    </style>
+</template>
+
 <template id="website.assets_frontend" name="Website assets">
     <t t-call="web.assets_common"/>
     <t t-call="website.theme"/>
+    <t t-call="website.custom_css"/>
 
     <script type="text/javascript" src="/web/static/src/js/watch.js"></script>
     <script type="text/javascript" src="/web/static/lib/qweb/qweb2.js"></script>
