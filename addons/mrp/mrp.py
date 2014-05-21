@@ -205,9 +205,9 @@ class mrp_bom(osv.osv):
         'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of bills of material."),
         'position': fields.char('Internal Reference', size=64, help="Reference to a position in an external plan."),
         'product_id': fields.many2one('product.product', 'Product', required=True),
-        'product_uos_qty': fields.float('Product UOS Qty'),
+        'product_uos_qty': fields.float('Product UOS Qty', digits_compute= dp.get_precision('Quantity')),
         'product_uos': fields.many2one('product.uom', 'Product UOS', help="Product UOS (Unit of Sale) is the unit of measurement for the invoicing and promotion of stock."),
-        'product_qty': fields.float('Product Quantity', required=True, digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_qty': fields.float('Product Quantity', required=True, digits_compute=dp.get_precision('Quantity')),
         'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True, help="Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control"),
         'product_rounding': fields.float('Product Rounding', help="Rounding applied on the product quantity."),
         'product_efficiency': fields.float('Manufacturing Efficiency', required=True, help="A factor of 0.9 means a loss of 10% within the production process."),
@@ -1104,9 +1104,9 @@ class mrp_production_product_line(osv.osv):
     _columns = {
         'name': fields.char('Name', size=64, required=True),
         'product_id': fields.many2one('product.product', 'Product', required=True),
-        'product_qty': fields.float('Product Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
+        'product_qty': fields.float('Product Quantity', digits_compute=dp.get_precision('Quantity'), required=True),
         'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True),
-        'product_uos_qty': fields.float('Product UOS Quantity'),
+        'product_uos_qty': fields.float('Product UOS Quantity', digits_compute= dp.get_precision('Quantity')),
         'product_uos': fields.many2one('product.uom', 'Product UOS'),
         'production_id': fields.many2one('mrp.production', 'Production Order', select=True),
     }

@@ -103,9 +103,9 @@ class account_bank_statement(osv.osv):
             readonly=True, states={'draft':[('readonly',False)]}),
         'period_id': fields.many2one('account.period', 'Period', required=True,
             states={'confirm':[('readonly', True)]}),
-        'balance_start': fields.float('Starting Balance', digits_compute=dp.get_precision('Account'),
+        'balance_start': fields.float('Starting Balance', digits_compute=dp.get_precision('Amount'),
             states={'confirm':[('readonly',True)]}),
-        'balance_end_real': fields.float('Ending Balance', digits_compute=dp.get_precision('Account'),
+        'balance_end_real': fields.float('Ending Balance', digits_compute=dp.get_precision('Amount'),
             states={'confirm': [('readonly', True)]}, help="Computed using the cash control lines"),
         'balance_end': fields.function(_end_balance,
             store = {
@@ -553,7 +553,7 @@ class account_bank_statement_line(osv.osv):
     _columns = {
         'name': fields.char('Description', required=True),
         'date': fields.date('Date', required=True),
-        'amount': fields.float('Amount', digits_compute=dp.get_precision('Account')),
+        'amount': fields.float('Amount', digits_compute=dp.get_precision('Amount')),
         'type': fields.selection([
             ('supplier','Supplier'),
             ('customer','Customer'),
