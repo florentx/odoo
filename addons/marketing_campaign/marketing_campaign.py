@@ -129,7 +129,7 @@ Normal - the campaign runs normally and automatically sends all emails and repor
                                    'Status',),
         'activity_ids': fields.one2many('marketing.campaign.activity',
                                        'campaign_id', 'Activities'),
-        'fixed_cost': fields.float('Fixed Cost', help="Fixed cost for running this campaign. You may also specify variable cost and revenue on each campaign activity. Cost and Revenue statistics are included in Campaign Reporting.", digits_compute=dp.get_precision('Product Price')),
+        'fixed_cost': fields.float('Fixed Cost', help="Fixed cost for running this campaign. You may also specify variable cost and revenue on each campaign activity. Cost and Revenue statistics are included in Campaign Reporting.", digits_compute=dp.get_precision('Price')),
         'segment_ids': fields.one2many('marketing.campaign.segment', 'campaign_id', 'Segments', readonly=False),
         'segments_count': fields.function(_count_segments, type='integer', string='Segments')
     }
