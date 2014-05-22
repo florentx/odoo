@@ -135,6 +135,20 @@ class purchase_order(osv.osv):
             res[purchase.id] = all(line.invoiced for line in purchase.order_line)
         return res
     
+    def _paid(self, cursor, user, ids, name, arg, context=None):
+        res = {}
+        for purchase in self.browse(cursor, user, ids, context=context):
+            paid = False
+            paid_invoice_ids = []
+            if purchase.invoiced_rate == 100.00:
+                for invoice in purchase.invoice_ids:
+                    if invoice.state == 'paid':
+                        paid_invoice_ids.append(invoice.id)
+            if purchase.invoice_ids and len(paid_invoice_ids) == len(purchase.invoice_ids):
+                paid = True
+            res[purchase.id] = paid
+        return res
+    
     def _get_journal(self, cr, uid, context=None):
         if context is None:
             context = {}
@@ -221,6 +235,7 @@ class purchase_order(osv.osv):
         'shipped':fields.boolean('Received', readonly=True, select=True, help="It indicates that a picking has been done"),
         'shipped_rate': fields.function(_shipped_rate, string='Received Ratio', type='float'),
         'invoiced': fields.function(_invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice has been paid"),
+        'paid': fields.function(_paid, string='Invoice Paid', type='boolean', help="It indicates that an invoice has been paid"),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced', type='float'),
         'invoice_method': fields.selection([('manual','Based on Purchase Order lines'),('order','Based on generated draft invoice'),('picking','Based on incoming shipments')], 'Invoicing Control', required=True,
             readonly=True, states={'draft':[('readonly',False)], 'sent':[('readonly',False)]},
@@ -815,6 +830,7 @@ class purchase_order(osv.osv):
             'origin': '',
             'partner_ref': '',
             'name': self.pool.get('ir.sequence').get(cr, uid, 'purchase.order'),
+            'paid': False,
         })
         return super(purchase_order, self).copy(cr, uid, id, default, context)
 
@@ -1429,6 +1445,7 @@ class account_invoice(osv.Model):
         po_ids = purchase_order_obj.search(cr, user_id, [('invoice_ids', 'in', ids)], context=context)
         for po_id in po_ids:
             purchase_order_obj.message_post(cr, user_id, po_id, body=_("Invoice paid"), context=context)
+            workflow.trg_write(uid, 'purchase.order', po_id, cr)
         return res
 
 class account_invoice_line(osv.Model):
