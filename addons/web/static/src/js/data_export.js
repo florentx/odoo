@@ -6,9 +6,11 @@ openerp.web.data_export = {};
 
 var QWeb = instance.web.qweb,
       _t = instance.web._t;
-instance.web.DataExport = instance.web.Dialog.extend({
+instance.web.client_actions.add(
+        'export', 'instance.web.DataExport');
+ 
+instance.web.DataExport = instance.web.Widget.extend({
     template: 'ExportTreeView',
-    dialog_title: {toString: function () { return _t("Export Data"); }},
     events: {
         'click #add_field': function () {
             var self = this;
@@ -19,65 +21,124 @@ instance.web.DataExport = instance.web.Dialog.extend({
                     var string = $(this).attr('string');
                     self.add_field(id, string);
                 });
+            this.on_show_save_list();
         },
         'click #remove_field': function () {
             this.$('#fields_list option:selected').remove();
+            if (!(this.$('#fields_list option').val())){self.$('#savenewlist').hide();}
         },
         'click #remove_all_field': function () {
             this.$('#fields_list').empty();
+            self.$('#savenewlist').hide();
+
         },
-        'click #export_new_list': 'on_show_save_list',
+        'click .oe_export_file':'on_click_export_data',
+        'click #oe_export_cancel': function () {
+        	this.exit();
+        },
     },
     init: function(parent, dataset) {
         var self = this;
-        var options = {
-            buttons: [
-                {text: _t("Close"), click: function () { self.$el.parents('.modal').modal('hide'); }},
-                {text: _t("Export To File"), click: function () { self.on_click_export_data(); }}
-            ],
-            close: function () { self.close();}
-        };
-        this._super(parent, options);
+        this._super(parent);
         this.records = {};
         this.dataset = dataset;
+        this.domain = dataset.params.domain;
+        this.history_back = dataset.params.history_back;
+        this.selected_ids = dataset.params.selected_ids;
         this.exports = new instance.web.DataSetSearch(
-            this, 'ir.exports', this.dataset.get_context());
+        this, 'ir.exports', this.dataset.params.context);
     },
     start: function() {
         var self = this;
         this._super.apply(this, arguments);
+        domain=this.dataset.params.domain;
+        self.$el.removeClass('ui-dialog-content ui-widget-content');
+        
+        self.$el.find(".up").on('click',function(){
+				
+				var row = $('#fields_list option:selected');
+                row.each(function(){
+                    var previndex=$(this).prev().index();
+                    if(previndex>=0){
+                        var rowindex=$(this).index();
+                        $(this).attr("id",previndex);
+                        $(this).prev().attr("id",rowindex);
+                        $(this).insertBefore($(this).prev());
+                    }
+                 });
+		});	
+		self.$el.find(".down").on('click',function(){
+			var row = self.$('#fields_list option:selected');
+			row.each(function(){
+				var nextindex=$(this).next().index();
+                if(nextindex>=0){
+                    var rowindex=$(this).index();
+                    $(this).attr("id",nextindex);
+                    $(this).next().attr("id",rowindex);
+                    $(this).insertAfter($(this).next());
+                }
 
-        var got_fields = new $.Deferred();
-        this.$el.find('#import_compat').change(function() {
-            self.$el.find('#fields_list').empty();
-            self.$el.find('#field-tree-structure').remove();
-            var import_comp = self.$el.find("#import_compat").val();
-            self.rpc("/web/export/get_fields", {
-                model: self.dataset.model,
-                import_compat: !!import_comp,
-            }).done(function (records) {
-                got_fields.resolve();
-                self.on_show_data(records);
-            });
-        }).change();
+			});
+		});	
+		var got_fields = new $.Deferred();
+		this.$el.find("#import_compat").on('click',function(){
+			if($(this).is(":checked")){
+			
+				self.$el.find('#fields_list').empty();
+				self.$el.find('#field-tree-structure').remove();
+				var import_comp = self.$el.find("#import_compat").val();
+				self.rpc("/web/export/get_fields", {
+					model: self.dataset.params.model,
+					import_compat: !!import_comp,
+				}).done(function (records) {
+					got_fields.resolve();
+					self.on_show_data(records);
+				});
+			}else{
+				self.$el.find('#fields_list').empty();
+				self.$el.find('#field-tree-structure').remove();
+				var import_comp = "";
+				self.rpc("/web/export/get_fields", {
+					model: self.dataset.params.model,
+					import_compat: !!import_comp,
+				}).done(function (records) {
+					got_fields.resolve();
+					self.on_show_data(records);
+				});
 
-        var got_domain = this.getParent().get_active_domain().then(function (domain) {
+			}
+		});
+	
+		self.$el.find('#fields_list').empty();
+		self.$el.find('#field-tree-structure').remove();
+		var import_comp = "";
+		self.rpc("/web/export/get_fields", {
+        model: self.dataset.params.model,
+        import_compat: !!import_comp,
+    }).done(function (records) {
+        got_fields.resolve();
+        self.on_show_data(records);
+    });
+        var got_domain = this.domain.then(function (domain) {
             if (domain === undefined) {
-                self.ids_to_export = self.getParent().get_selected_ids();
+                self.ids_to_export = self.selected_ids;
                 self.domain = self.dataset.domain;
-            }
-            else {
+            }else {
                 self.ids_to_export = false;
                 self.domain = domain;
             }
-            self.on_show_domain();
-        });
-
+        });		
         return $.when(
             got_fields,
             got_domain,
             this.rpc('/web/export/formats', {}).done(this.do_setup_export_formats),
             this.show_exports_list());
+    },
+    exit: function () {
+        this.do_action({
+            type: 'ir.actions.client',
+            tag: 'history_back'
+        });
     },
     do_setup_export_formats: function (formats) {
         var $fmts = this.$el.find('#export_format');
@@ -100,18 +161,23 @@ instance.web.DataExport = instance.web.Dialog.extend({
             return $.when();
         }
         return this.exports.read_slice(['name'], {
-            domain: [['resource', '=', this.dataset.model]]
+            domain: [['resource', '=', this.dataset.params.model]]
         }).done(function (export_list) {
             if (!export_list.length) {
                 return;
             }
+            
             self.$el.find('#ExistsExportList').append(QWeb.render('Exists.ExportList', {'existing_exports': export_list}));
             self.$el.find('#saved_export_list').change(function() {
                 self.$el.find('#fields_list option').remove();
                 var export_id = self.$el.find('#saved_export_list option:selected').val();
                 if (export_id) {
-                    self.rpc('/web/export/namelist', {'model': self.dataset.model, export_id: parseInt(export_id, 10)}).done(self.do_load_export_field);
-                }
+                	$("#delete_export_list").show();
+                	$("#savenewlist").hide();
+                	
+                    self.rpc('/web/export/namelist', {'model': self.dataset.params.model, export_id: parseInt(export_id, 10)}).done(self.do_load_export_field);
+                }else{$('#delete_export_list').hide();$("#oe_export_list_update").show();}
+                
             });
             self.$el.find('#delete_export_list').click(function() {
                 var select_exp = self.$el.find('#saved_export_list option:selected');
@@ -136,7 +202,7 @@ instance.web.DataExport = instance.web.Dialog.extend({
         var self = this;
         var current_node = self.$el.find("#savenewlist");
         if (!(current_node.find("label")).length) {
-            current_node.append(QWeb.render('ExportNewList'));
+        	current_node.append(QWeb.render('ExportNewList'));
             current_node.find("#add_export_list").click(function() {
                 var value = current_node.find("#savelist_name").val();
                 if (value) {
@@ -144,25 +210,26 @@ instance.web.DataExport = instance.web.Dialog.extend({
                 } else {
                     alert(_t("Please enter save field list name"));
                 }
+                current_node.hide();
             });
         } else {
             if (current_node.is(':hidden')) {
                 current_node.show();
                 current_node.find("#savelist_name").val("");
             } else {
-               current_node.hide();
+               
             }
         }
     },
     do_save_export_list: function(value) {
-        var self = this;
+        var self = this;  
         var fields = self.get_fields();
         if (!fields.length) {
             return;
         }
         this.exports.create({
             name: value,
-            resource: this.dataset.model,
+            resource: this.dataset.params.model,
             export_fields: _(fields).map(function (field) {
                 return [0, 0, {name: field}];
             })
@@ -207,9 +274,6 @@ instance.web.DataExport = instance.web.Dialog.extend({
             self.showcontent(record.id);
         }
     },
-    on_show_domain: function() {
-        this.$el.find('tr').first().find('td').append(QWeb.render('ExportTreeView-Domain', {'record': this}));
-    },
     on_show_data: function(result, after) {
         var self = this;
 
@@ -218,7 +282,7 @@ instance.web.DataExport = instance.web.Dialog.extend({
             current_tr.addClass('open');
             current_tr.find('img').attr('src','/web/static/src/img/collapse.gif');
             current_tr.after(QWeb.render('ExportTreeView-Secondary.children', {'fields': result}));
-        } else {
+        }else {
             self.$el.find('#left_field_panel').append(QWeb.render('ExportTreeView-Secondary', {'fields': result}));
         }
         _.each(result, function(record) {
@@ -324,6 +388,7 @@ instance.web.DataExport = instance.web.Dialog.extend({
                 if (!$o2m_selection.hasClass("oe_export_readonlyfield")) {
                    self.add_field(record.id, $(this).find("a").attr("string"));
                 }
+                self.on_show_save_list();
             });
         });
         self.$el.find('#fields_list').mouseover(function(event) {
@@ -376,7 +441,7 @@ instance.web.DataExport = instance.web.Dialog.extend({
     get_fields: function() {
         var export_fields = this.$("#fields_list option").map(function() {
             return $(this).val();
-        }).get();
+        }).get();					
         if (!export_fields.length) {
             alert(_t("Please select fields to save export list..."));
         }
@@ -402,7 +467,7 @@ instance.web.DataExport = instance.web.Dialog.extend({
         this.session.get_file({
             url: '/web/export/' + export_format,
             data: {data: JSON.stringify({
-                model: this.dataset.model,
+                model: this.dataset.params.model,
                 fields: exported_fields,
                 ids: this.ids_to_export,
                 domain: this.domain,

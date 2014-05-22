@@ -730,9 +730,8 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             }
         }
     },
-    on_button_save: function(e) {
+    on_button_save: function() {
         var self = this;
-        $(e.target).attr("disabled", true);
         return this.save().done(function(result) {
             self.trigger("save", result);
             self.reload().then(function() {
@@ -742,8 +741,6 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                     parent.menu.do_reload_needaction();
                 }
             });
-        }).always(function(){
-            $(e.target).attr("disabled", false);
         });
     },
     on_button_cancel: function(event) {
@@ -1869,25 +1866,9 @@ instance.web.form.FormWidget = instance.web.Widget.extend(instance.web.form.Invi
     do_attach_tooltip: function(widget, trigger, options) {
         widget = widget || this;
         trigger = trigger || this.$el;
-        var container = 'body';
-        /*TODO: need to be refactor
-        in the case we can find the view form in the parent, 
-        attach the element to it (to prevent tooltip to keep showing
-        when switching view) or if we have a modal currently showing,
-        attach tooltip to the modal to prevent the tooltip to show in the body in the
-        case we close the modal too fast*/
-        if ($(trigger).parents('.oe_view_manager_view_form').length > 0){
-            container = $(trigger).parents('.oe_view_manager_view_form');
-        }
-        else {
-            if (window.$('.modal.in').length>0){
-                container = window.$('.modal.in:last()');
-            }
-        }
         options = _.extend({
                 delay: { show: 500, hide: 0 },
                 trigger: 'hover',
-                container: container,
                 title: function() {
                     var template = widget.template + '.tooltip';
                     if (!QWeb.has_template(template)) {
@@ -1940,7 +1921,7 @@ instance.web.form.WidgetButton = instance.web.form.FormWidget.extend({
     init: function(field_manager, node) {
         node.attrs.type = node.attrs['data-button-type'];
         this.is_stat_button = /\boe_stat_button\b/.test(node.attrs['class']);
-        this.icon_class = node.attrs.icon && "stat_button_icon fa " + node.attrs.icon + " fa-fw";
+        this.icon = node.attrs.icon && "<span class=\"fa " + node.attrs.icon + " fa-fw\"></span>";
         this._super(field_manager, node);
         this.force_disabled = false;
         this.string = (this.node.attrs.string || '').replace(/_/g, '');
@@ -2363,106 +2344,6 @@ instance.web.form.FieldChar = instance.web.form.AbstractField.extend(instance.we
             width: width
         });
     }
-});
-
-instance.web.form.KanbanSelection = instance.web.form.FieldChar.extend({
-    init: function (field_manager, node) {
-        this._super(field_manager, node);
-    },
-    prepare_dropdown_selection: function() {
-        var self = this;
-        var data = [];
-        var selection = self.field.selection || [];
-        _.map(selection, function(res) {
-            var value = {
-                'name': res[0],
-                'tooltip': res[1],
-                'state_name': res[1],
-            }
-            if (res[0] == 'normal') { value['state_class'] = 'oe_kanban_status'; }
-            else if (res[0] == 'done') { value['state_class'] = 'oe_kanban_status oe_kanban_status_green'; }
-            else { value['state_class'] = 'oe_kanban_status oe_kanban_status_red'; }
-            data.push(value);
-        });
-        return data;
-    },
-    render_value: function() {
-        var self = this;
-        this.record_id = self.view.datarecord.id;
-        this.states = self.prepare_dropdown_selection();;
-        this.$el.html(QWeb.render("KanbanSelection", {'widget': self}));
-        this.$el.find('.oe_legend').click(self.do_action.bind(self));
-    },
-    do_action: function(e) {
-        var self = this;
-        var li = $(e.target).closest( "li" );
-        if (li.length) {
-            var value = {};
-            value[self.name] = String(li.data('value'));
-            if (self.record_id) {
-                return self.view.dataset._model.call('write', [[self.record_id], value, self.view.dataset.get_context()]).done(self.reload_record.bind(self));
-            } else {
-                return self.view.on_button_save().done(function(result) {
-                    if (result) {
-                        self.view.dataset._model.call('write', [[result], value, self.view.dataset.get_context()]).done(self.reload_record.bind(self));
-                    }
-                });
-            }
-        }
-    },
-    reload_record: function() {
-        this.view.reload();
-    },
-});
-
-instance.web.form.Priority = instance.web.form.FieldChar.extend({
-    init: function (field_manager, node) {
-        this._super(field_manager, node);
-    },
-    prepare_priority: function() {
-        var self = this;
-        var selection = this.field.selection || [];
-        var init_value = selection && selection[0][0] || 0;
-        var data = _.map(selection.slice(1), function(element, index) {
-            var value = {
-                'value': element[0],
-                'name': element[1],
-                'click_value': element[0],
-            }
-            if (index == 0 && self.get('value') == element[0]) {
-                value['click_value'] = init_value;
-            }
-            return value;
-        });
-        return data;
-    },
-    render_value: function() {
-        var self = this;
-        this.record_id = self.view.datarecord.id;
-        this.priorities = self.prepare_priority();
-        this.$el.html(QWeb.render("Priority", {'widget': this}));
-        this.$el.find('.oe_legend').click(self.do_action.bind(self));
-    },
-    do_action: function(e) {
-        var self = this;
-        var li = $(e.target).closest( "li" );
-        if (li.length) {
-            var value = {};
-            value[self.name] = String(li.data('value'));
-            if (self.record_id) {
-                return self.view.dataset._model.call('write', [[self.record_id], value, self.view.dataset.get_context()]).done(self.reload_record.bind(self));
-            } else {
-                return self.view.on_button_save().done(function(result) {
-                    if (result) {
-                        self.view.dataset._model.call('write', [[result], value, self.view.dataset.get_context()]).done(self.reload_record.bind(self));
-                    }
-                });
-            }
-        }
-    },
-    reload_record: function() {
-        this.view.reload();
-    },
 });
 
 instance.web.form.FieldID = instance.web.form.FieldChar.extend({
@@ -3456,16 +3337,13 @@ instance.web.form.CompletionFieldMixin = {
 instance.web.form.M2ODialog = instance.web.Dialog.extend({
     template: "M2ODialog",
     init: function(parent) {
-        this.name = parent.string;
         this._super(parent, {
-            title: _.str.sprintf(_t("Create a %s"), parent.string),
+            title: _.str.sprintf(_t("Add %s"), parent.string),
             size: 'medium',
         });
     },
     start: function() {
         var self = this;
-        var text = _.str.sprintf(_t("You are creating a new %s, are you sure it does not exist yet?"), self.name);
-        this.$("p").text( text );
         this.$buttons.html(QWeb.render("M2ODialog.buttons"));
         this.$("input").val(this.getParent().last_query);
         this.$buttons.find(".oe_form_m2o_qc_button").click(function(){
@@ -3589,7 +3467,7 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
                     self.display_value_backup = {};
                     self.render_value();
                     self.focus();
-                    self.trigger('changed_value');
+                    self.view.do_onchange(self);
                 });
             });
         });
@@ -3724,8 +3602,6 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
             minLength: 0,
             delay: 250
         });
-        // set position for list of suggestions box
-        this.$input.autocomplete( "option", "position", { my : "left top", at: "left bottom" } );
         this.$input.autocomplete("widget").openerpClass();
         // used to correct a bug when selecting an element by pushing 'enter' in an editable list
         this.$input.keyup(function(e) {
@@ -6215,8 +6091,6 @@ instance.web.form.widgets = new instance.web.Registry({
     'monetary': 'instance.web.form.FieldMonetary',
     'many2many_checkboxes': 'instance.web.form.FieldMany2ManyCheckBoxes',
     'x2many_counter': 'instance.web.form.X2ManyCounter',
-    'priority':'instance.web.form.Priority',
-    'kanban_state_selection':'instance.web.form.KanbanSelection',
     'statinfo': 'instance.web.form.StatInfo',
 });
 

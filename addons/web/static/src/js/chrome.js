@@ -859,10 +859,6 @@ instance.web.Menu =  instance.web.Widget.extend({
                 $clicked_menu.parent().addClass('active');
             }
         }
-        // add a tooltip to cropped menu items
-        this.$secondary_menus.find('.oe_secondary_submenu li a span').each(function() {
-            $(this).tooltip(this.scrollWidth > this.clientWidth ? {title: $(this).text().trim(), placement: 'auto right'} :'destroy');
-       });
     },
     /**
      * Call open_menu with the first menu_item matching an action_id
@@ -1461,7 +1457,7 @@ instance.web.embed = function (origin, dbname, login, key, action, options) {
     $('head').append($('<link>', {
         'rel': 'stylesheet',
         'type': 'text/css',
-        'href': origin +'/web/css/web.assets_webclient'
+        'href': origin +'/web/webclient/css'
     }));
     var currentScript = document.currentScript;
     if (!currentScript) {

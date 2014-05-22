@@ -40,7 +40,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3 class="modal-title"><t t-raw="title"/></h3>
                 </div>
-                <div class="modal-body" style="overflow-y: auto;">
+                <div class="modal-body">
                 </div>
             </div>
         </div>
@@ -496,7 +496,7 @@
                         </h2>
                 </td>
                 <td colspan="2">
-                        <div class="oe_view_manager_view_search"/>
+                        <div class="oe_view_manager_view_search" t-opentag="true"/>
                 </td>
             </tr>
             <tr class="oe_header_row">
@@ -800,11 +800,12 @@
 </t>
 <button t-name="ListView.row.text_button" type="button"
         t-att-title="widget.string" t-att-disabled="disabled || undefined"
-        t-att-class="disabled ? 'oe_list_button_disabled btn_txt oe_link' : 'btn_txt oe_link'"
-        ><t t-esc="widget.string"/></button>
+        t-att-class="disabled ? 'oe_list_button_disabled btn' : 'btn'">
+    <t t-esc="widget.string"/>
+</button>
 <button t-name="ListView.row.button" type="button"
         t-att-title="widget.string" t-att-disabled="disabled || undefined"
-        t-att-class="disabled ? 'oe_list_button_disabled' : ''"
+        t-att-class="disabled ? 'oe_list_button_disabled btn_img' : 'btn_img'"
         ><img t-attf-src="#{prefix}/web/static/src/img/icons/#{widget.icon}.png"
         t-att-alt="widget.string"/></button>
 <t t-extend="ListView.row">
@@ -1028,39 +1029,6 @@
             <span class="oe_form_char_content"></span>
         </t>
     </span>
-</t>
-<t t-name="KanbanSelection">
-    <div class="btn-group kanban_state">
-        <t t-foreach="widget.states" t-as="rec">
-            <a t-if="widget.get('value') === rec.name">
-                <a class="oe_legend dropdown-toggle" data-toggle="dropdown">
-                    <span t-att-class="rec.state_class" t-if="widget.get('value') === rec.name" t-att-title="rec.tooltip"/>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </a>
-            </a>
-        </t>
-        <ul class="dropdown-menu state" role="menu">
-            <t t-foreach="widget.states" t-as="rec">
-                <t t-if="widget.get('value') !== rec.name">
-                    <li class="oe_legend" t-att-data-value="rec.name" ><a href="#">
-                        <span t-att-class="rec.state_class" t-att-title="rec.tooltip"/>
-                        <t t-raw="rec.state_name" /></a>
-                    </li>
-                </t>
-            </t>
-        </ul>
-    </div>
-</t>
-<t t-name="Priority">
-    <ul style="list-style: none; padding-left: 2px; display: inline-block;">
-        <t t-foreach="widget.priorities" t-as="rec" >
-            <li t-att-data-value="rec.click_value" class="oe_legend" style="display: inline-block;">
-                <a href="#" t-att-title="rec.name">
-                    <span t-att-class="widget.get('value') gte rec.value and 'oe_e oe_star_on' or 'oe_e oe_star_off'">7</span>
-                </a>
-            </li>
-        </t>
-    </ul>
 </t>
 <t t-name="FieldEmail">
     <span class="oe_form_field oe_form_field_email" t-att-style="widget.node.attrs.style">
@@ -1441,7 +1409,7 @@
         t-att-autofocus="widget.node.attrs.autofocus"
         t-att-accesskey="widget.node.attrs.accesskey">
         <img t-if="!widget.is_stat_button and widget.node.attrs.icon " t-att-src="_s + widget.node.attrs.icon" width="16" height="16"/>
-        <div t-if="widget.is_stat_button and widget.icon_class" t-att-class="widget.icon_class"></div>
+        <div t-if="widget.is_stat_button and widget.icon" class="stat_button_icon"><t t-raw="widget.icon"/></div>
         <span t-if="widget.string and !widget.is_stat_button"><t t-esc="widget.string"/></span>
         <div t-if="widget.string and widget.is_stat_button"><t t-esc="widget.string"/></div>
     </button>
@@ -1780,67 +1748,74 @@
         <option t-att-value="element[0]"><t t-esc="element[1]"/></option>
         </t>
     </select>
-</t>
-
+</t> 
 <t t-name="ExportView">
     <a id="exportview" href="javascript: void(0)" style="text-decoration: none;color: #3D3D3D;">Export</a>
 </t>
-<table t-name="ExportTreeView" class="oe_export"
-       style="background-color: #F3F3F3;">
-    <tr>
-        <td colspan="3">
-            This wizard will export all data that matches the current search criteria to a CSV file.
-            You can export all data or only the fields that can be reimported after modification.
-        </td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            <label for="import_compat">Export Type:</label>
-            <select id="import_compat" name="import_compat">
-                <option value="yes">Import-Compatible Export</option>
-                <option value="">Export all Data</option>
-            </select>
-
-            <label for="export_format">Export Formats</label>
-            <select id="export_format" name="export_format"></select>
-        </td>
-    </tr>
-
-    <tr>
-        <th>Available fields</th>
-        <th/>
-        <th>
-            Fields to export
-            <a style="color: blue; text-decoration: none;" href="#" id="export_new_list">Save fields list</a>
-            <div id="savenewlist"></div>
-            <div id="ExistsExportList"></div>
-        </th>
-    </tr>
-    <tr style="height: 400px;">
-        <td class="oe_export_fields_selector_left">
-            <div id="left_field_panel">
-            </div>
-        </td>
-        <td class="oe_export_fields_selector_center">
-            <!-- TODO: replace ids by 'oe_*' classes -->
-            <button class="oe_button" id="add_field">Add</button>
-            <button class="oe_button" id="remove_field">Remove</button>
-            <button class="oe_button" id="remove_all_field">Remove All</button>
-        </td>
-        <td class="oe_export_fields_selector_right">
-            <select name="fields_list" id="fields_list"
-                    multiple="multiple"></select>
-        </td>
-    </tr>
-</table>
-<t t-name="ExportTreeView-Domain">
-    <t t-if="! record.ids_to_export">
-        <p><strong>Please pay attention that all records matching your search filter will be exported. Not only the selected ids.</strong></p>
-    </t>
-    <t t-if="record.ids_to_export">
-        <p><strong>Please note that only the selected ids will be exported.</strong></p>
-    </t>
-</t>
+<div t-name="ExportTreeView" class="oe_export" style="background-color: #FFFFFF;" >
+  <div class="oe_view_manager oe_view_manager_current ">
+  	<div class="oe_view_manager_header oe_padding">
+  		<h2>Export Data</h2>
+  		<button type="button" class="oe_button oe_export_file oe_highlight">Export to File</button>
+  		<span class="oe_fade">or</span>
+  		<a id="oe_export_cancel" href="#">Cancel</a>
+    </div>
+  </div>
+  <div class="col-md-12">
+  	<div style="padding-left:16px;" id="export_info"></div>
+  </div>
+  <div class="col-md-12">
+  	<div style="padding-left:35px; font-size:16px;" class="checkbox" title="Data will export in Import-Compatible mode. It can easily import with out any trouble."><label><input type="checkbox" id="import_compat" value="yes">Import-Compatible Export</input></label></div>
+  </div> 
+  <div class="col-md-12">
+  	<form class="form">
+  		<div class="col-md-2 export_format">
+			<label style="font-size:18px; padding-top:2px;" for="export_format">Export Formats </label>
+            <select style="width:120px;" class="form-control" id="export_format" name="export_format"></select>
+    	</div>
+    	<div id="savenewlist"></div>
+    	<div id="ExistsExportList"></div>
+    </form>     
+  </div>
+  <div class="col-md-12" style="margin-bottom:50px;">
+  	<div class="col-md-5 oe_export_fields_selector_left">
+    	<div class="text-center"><h3>Available fields</h3></div>
+    	<div id="left_field_panel"></div>
+    </div>
+    <div class="col-md-2 oe_export_fields_selector_center" style="padding-top: 50px;">
+    	<br></br><a><img class="oe_image_field up" style="padding:15px;" src="/web/static/src/img/up.png" title="Move selected Export Field Up" ></img></a>
+  		<br><a><img class="oe_image_field down" style="padding:15px;" src="/web/static/src/img/down.png" title="Move selected Export Field Down"></img></a></br>
+  		<br><a><img class="oe_image_field" style="padding:15px;" src="/web/static/src/img/add.png" id="add_field" title="Add Selected Field to Export List"></img></a></br>
+     	<br><a><img class="oe_image_field" style="padding:15px;" src="/web/static/src/img/remove.png" id="remove_field" title="Remove Selected Field from Export List"></img></a></br>
+     	<br><a><img class="oe_image_field" style="padding:15px;" src="/web/static/src/img/removeall.png" id="remove_all_field" title="Clear All Fields From List"></img></a></br>
+    </div>
+    <div class="col-md-5 oe_export_fields_selector_right">
+      	<div class="text-center"><h3>Fields to export   </h3></div>
+    	<select name="fields_list" id="fields_list" multiple="multiple"></select>
+    </div>
+   </div> 
+</div>
+<div class="col-md-2" t-name="ExportNewList">
+	<div>
+        <label style="font-size:18px;">Save as</label>
+        <form class="form-inline">
+        <input class="form-control" style="width:120px;" type="text" id="savelist_name"/>
+        <a><img  style="width:20px;" id="add_export_list" src="/web/static/src/img/save.png"  title="Save List"></img></a>
+   		</form>
+    </div>
+</div>
+<div class="col-md-3" id="Exists.ExportList" t-name="Exists.ExportList">
+	<label style="font-size:18px;">Available Exports List</label>
+  	<form class="form-inline">
+  		<select style="width:140px;" class="form-control"  id="saved_export_list">
+  			<option></option>
+  			<t t-foreach="existing_exports" t-as="export">
+  				<option t-att-value="export.id"><t t-esc="export.name"/></option>
+        	</t>
+    	</select>
+    	<a><img style="width:15px;" id="delete_export_list" src="/web/static/src/img/remove.png"  title="Delete List" hidden="true"></img></a>
+	</form>
+</div>
 <table t-name="ExportTreeView-Secondary"
        id="field-tree-structure" class="oe_export_fields_selector_export"
        cellspacing="0" cellpadding="0">
@@ -1851,7 +1826,7 @@
     t-foreach="fields" t-as="field"
     t-att-id="'treerow-' + field.id" class="oe_export_row">
     <td>
-        <table class="tree_grid" border="0">
+        <table class="tree_grid" style="font-size:16px;" border="0">
             <tr class="oe_export_row">
                 <t t-foreach="(field.id).split('/')" t-as="level" >
                     <t t-if="(field.id).split('/')[0] != level">
@@ -1874,25 +1849,6 @@
         </table>
     </td>
 </tr>
-<t t-name="ExportNewList">
-    <tr>
-        <th><label>Save as:</label></th>
-        <td><input size="10" type="text" id="savelist_name"/></td>
-        <td><button class="oe_button oe_export_button_export" id="add_export_list">Ok</button></td>
-    </tr>
-</t>
-<t t-name="Exists.ExportList">
-    <label for="saved_export_list">Saved exports:</label>
-
-    <select id="saved_export_list">
-        <option></option>
-        <t t-foreach="existing_exports" t-as="export">
-            <option t-att-value="export.id"><t t-esc="export.name"/></option>
-        </t>
-    </select>
-    <button class="oe_button oe_export_button_export" id="delete_export_list" type="button">Delete</button>
-</t>
-
 <t t-name="ImportView">
     <a id="importview" href="javascript: void(0)" style="text-decoration: none;color: #3D3D3D;">Import</a>
 </t>
@@ -1980,14 +1936,13 @@
 </t>
 <t t-name="M2ODialog">
     <div>
-        <p class="oe_grey"/>
         Name: <input class="oe_form_m2o_input_name" type="text"/>
     </div>
 </t>
 <t t-name="M2ODialog.buttons">
-    <button class="oe_form_m2o_qc_button oe_button oe_highlight">Create</button>
-    <button class="oe_form_m2o_sc_button oe_button">Create and edit</button> or
-    <button class="oe_form_m2o_cancel_button oe_button oe_link"><span>Cancel</span></button>
+    <button class="oe_form_m2o_qc_button oe_button oe_highlight">Quick Add</button>
+    <button class="oe_form_m2o_sc_button oe_button">Add All Info...</button>
+    <button class="oe_form_m2o_cancel_button oe_button">Cancel</button>
 </t>
 <t t-name="FieldMonetary" t-extend="FieldChar">
     <t t-jquery="t:first" t-operation="before">
@@ -2018,5 +1973,6 @@
     <a href="javascript:void(0)"><t t-esc="text"/></a>
 </t>
 <t t-name="StatInfo">
-    <strong><t t-esc="value"/></strong><br/><t t-esc="text"/></t>
+    <strong><t t-esc="value"/></strong>
+    <t t-esc="text"/></t>
 </templates>

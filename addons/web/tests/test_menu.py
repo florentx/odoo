@@ -28,7 +28,9 @@ class LoadTest(common.MockRequestCase):
 
         self.MockMenus = model('ir.ui.menu')
         # Mock the absence of custom menu
-        model('res.users').read.return_value = []
+        model('res.users').read.return_value = [{
+            'menu_id': False
+        }]
 
     def tearDown(self):
         del self.MockMenus
