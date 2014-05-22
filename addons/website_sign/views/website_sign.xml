@@ -11,7 +11,7 @@
     <t t-call="website.layout">
         <t t-set="head">
             <script type="text/javascript" src="/website_sign/static/src/js/sign.js"></script>
-            <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script>
+            <script type="text/javascript" src="/website_sign/static/lib/jSignature/jSignature.min.js"></script>
             <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
             <t t-raw="head or ''"/>
         </t>
