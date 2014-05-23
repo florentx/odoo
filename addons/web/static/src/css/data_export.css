@@ -1,6 +1,24 @@
 .openerp .oe_export {
     width: 100%;
 }
+.openerp .oe_export_padding {
+    padding: 10px 20px 0;
+}
+
+.openerp .oe_export_left_padding {
+    padding: 10px 0 0 20px;
+    font-weight: bold;
+}
+
+.openerp .oe_export_right_padding {
+    padding: 10px 20px 0 0;
+    font-weight: bold;
+}
+
+.openerp .oe_export_left_padding.oe_export_options {
+    font-weight: normal !important;
+}
+
 /* Customize according bootstrap3 */
 .openerp .oe_export label {
     font-weight: normal;
@@ -29,6 +47,7 @@
 }
 
 .openerp .oe_export_fields_selector_left {
+    padding-left: 20px;
     width: 50%;
 }
 
@@ -44,14 +63,19 @@
 
 .openerp .oe_export_fields_selector_center {
     text-align: center;
+    vertical-align: middle;
 }
 .openerp .oe_export_fields_selector_center button {
     white-space: nowrap;
+    margin: 0 10px 5px 10px;
+    width: 90px;
+    padding: 3px 8px;
 }
 
 .openerp .oe_export_fields_selector_right {
     width: 45%;
     height: 400px;
+    padding-right: 20px;
 }
 
 .openerp .oe_export_fields_selector_right select{
@@ -72,7 +96,7 @@
     border: 1px solid #E3E3E3;
     text-align: left;
     white-space: nowrap;
-    background-color:#E3E3E3;
+    background-color: #E3E3E3;
     border-collapse: collapse;
     width: 100%;
 }

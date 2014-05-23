@@ -49,7 +49,6 @@ instance.web.DataExport = instance.web.Dialog.extend({
 
         var got_fields = new $.Deferred();
         this.$el.find('#import_compat').change(function() {
-            self.$el.find('#fields_list').empty();
             self.$el.find('#field-tree-structure').remove();
             var import_comp = self.$el.find("#import_compat").val();
             self.rpc("/web/export/get_fields", {
@@ -102,10 +101,10 @@ instance.web.DataExport = instance.web.Dialog.extend({
         return this.exports.read_slice(['name'], {
             domain: [['resource', '=', this.dataset.model]]
         }).done(function (export_list) {
-            if (!export_list.length) {
-                return;
-            }
             self.$el.find('#ExistsExportList').append(QWeb.render('Exists.ExportList', {'existing_exports': export_list}));
+            if (!export_list.length) {
+                self.$el.find('#ExistsExportList').hide();
+            }
             self.$el.find('#saved_export_list').change(function() {
                 self.$el.find('#fields_list option').remove();
                 var export_id = self.$el.find('#saved_export_list option:selected').val();
@@ -131,6 +130,10 @@ instance.web.DataExport = instance.web.Dialog.extend({
         _(field_list).each(function (field) {
             export_node.append(new Option(field.label, field.name));
         });
+        export_node.find("option").sort(function (a, b) {
+            return $(a).text().localeCompare($(b).text())
+        }).appendTo(export_node);
+
     },
     on_show_save_list: function() {
         var self = this;
@@ -166,14 +169,12 @@ instance.web.DataExport = instance.web.Dialog.extend({
             export_fields: _(fields).map(function (field) {
                 return [0, 0, {name: field}];
             })
-        }).then(function (export_list_id) {
-            if (!export_list_id) {
-                return;
+        }).done(function (export_list_id) {
+            if (self.$el.find("#saved_export_list").is(":hidden")) {
+               self.$el.find('#ExistsExportList').show();
             }
-            if (!self.$el.find("#saved_export_list").length || self.$el.find("#saved_export_list").is(":hidden")) {
-                self.show_exports_list();
-            }
-            self.$el.find("#saved_export_list").append( new Option(value, export_list_id) );
+            self.$el.find("#saved_export_list").append(
+                    new Option(value, export_list_id));
         });
         this.on_show_save_list();
     },
@@ -372,6 +373,9 @@ instance.web.DataExport = instance.web.Dialog.extend({
                 && !this.$el.find("#fields_list option[value='" + field_id + "']").length) {
             field_list.append(new Option(string, field_id));
         }
+        field_list.find("option").sort(function (a, b) {
+             return $(a).text().localeCompare($(b).text())
+        }).appendTo(field_list);
     },
     get_fields: function() {
         var export_fields = this.$("#fields_list option").map(function() {

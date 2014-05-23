@@ -156,7 +156,7 @@ instance.web.Dialog = instance.web.Widget.extend({
             'keyboard': true,
         });
         if (options.size !== 'large'){
-            var dialog_class_size = this.$dialog_box.find('.modal-lg').removeClass('modal-lg');
+            var dialog_class_size = this.$dialog_box.find('.modal-lg').removeClass('modal-lg')
             if (options.size === 'small'){
                 dialog_class_size.addClass('modal-sm');
             }
@@ -169,7 +169,7 @@ instance.web.Dialog = instance.web.Widget.extend({
         }
         $dialog_content.openerpClass();
 
-        this.$dialog_box.on('hidden.bs.modal', this, function() {
+        this.$dialog_box.on('hidden.bs.modal', this, function(){
             self.close();
         });
         this.$dialog_box.modal('show');
@@ -179,15 +179,13 @@ instance.web.Dialog = instance.web.Widget.extend({
         return res;
     },
     /**
-        Closes (hide) the popup, if destroy_on_close was passed to the constructor, it will be destroyed instead.
+        Closes the popup, if destroy_on_close was passed to the constructor, it is also destroyed.
     */
     close: function(reason) {
-        if (this.dialog_inited && !this.__tmp_dialog_hiding) {
+        if (this.dialog_inited) {
             this.trigger("closing", reason);
             if (this.$el.is(":data(bs.modal)")) {     // may have been destroyed by closing signal
-                this.__tmp_dialog_hiding = true;
-                this.$dialog_box.modal('hide');
-                this.__tmp_dialog_hiding = undefined;
+		this.$el.parents('.modal').modal('hide');
             }
         }
     },
@@ -218,16 +216,12 @@ instance.web.Dialog = instance.web.Widget.extend({
             //we need this to put the instruction to remove modal from DOM at the end
             //of the queue, otherwise it might already have been removed before the modal-backdrop
             //is removed when pressing escape key
-            var $element = this.$dialog_box;
             setTimeout(function () {
-                //remove modal from list of opened modal since we just destroy it
-                var modal_list_index = $.inArray($element, opened_modal);
-                if (modal_list_index > -1){
-                    opened_modal.splice(modal_list_index,1)[0].remove();
-                }
+                //remove last modal from list of opened modal since we just destroy it
+                opened_modal.pop().remove();
                 if (opened_modal.length > 0){
                     //we still have other opened modal so we should focus it
-                    opened_modal[opened_modal.length-1].focus();
+                    opened_modal[opened_modal.length-1].focus()
                 }
             },0);
         }
@@ -253,7 +247,8 @@ instance.web.CrashManager = instance.web.Class.extend({
             this.show_warning({type: "Session Expired", data: { message: _t("Your OpenERP session expired. Please refresh the current web page.") }});
             return;
         }
-        if (error.data.exception_type === "except_osv" || error.data.exception_type === "warning" || error.data.exception_type === "access_error") {
+        if (error.data.exception_type === "except_osv" || error.data.exception_type === "warning"
+                || error.data.exception_type === "access_error") {
             this.show_warning(error);
         } else {
             this.show_error(error);
