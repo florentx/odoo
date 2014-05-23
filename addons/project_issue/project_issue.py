@@ -213,7 +213,8 @@ class project_issue(osv.Model):
         if project_id:
             project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
             if project and project.partner_id:
-                return {'value': {'partner_id': project.partner_id.id}}
+                val = True if project.parent_id.type == 'contract' else False
+            return {'value': {'partner_id': project.partner_id.id, 'is_escalate': val}}
         return {}
 
     def _get_issue_task(self, cr, uid, ids, context=None):
@@ -284,6 +285,7 @@ class project_issue(osv.Model):
         'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
         'date_action_last': fields.datetime('Last Action', readonly=1),
         'date_action_next': fields.datetime('Next Action', readonly=1),
+        'is_escalate': fields.boolean('Project Type'),
         'progress': fields.function(_hours_get, string='Progress (%)', multi='hours', group_operator="avg", help="Computed as: Time Spent / Total Time.",
             store = {
                 'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['task_id'], 10),
@@ -300,6 +302,7 @@ class project_issue(osv.Model):
         'kanban_state': 'normal',
         'date_last_stage_update': fields.datetime.now,
         'user_id': lambda obj, cr, uid, context: uid,
+        'is_escalate': False,
     }
 
     _group_by_full = {
