@@ -2599,7 +2599,8 @@ instance.web.form.FieldDatetime = instance.web.form.AbstractField.extend(instanc
     },
     set_dimensions: function (height, width) {
         this._super(height, width);
-        this.datewidget.$input.css('height', height);
+        if (!this.get("effective_readonly") && this.datewidget.$input)
+            this.datewidget.$input.css('height', height);
     }
 });
 
@@ -3394,7 +3395,8 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
     },
     set_dimensions: function (height, width) {
         this._super(height, width);
-        this.$input.css('height', height);
+        if (!this.get("effective_readonly") && this.$input)
+            this.$input.css('height', height);
     }
 });
 
