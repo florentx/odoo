@@ -13,6 +13,15 @@
                         <label for="group_template_required"/>
                     </div>
                 </xpath>
+                <xpath expr="//label[@string='Default Options']" position="replace">
+                    <label for="id" string="Default Options" attrs="{'invisible':[('module_account_analytic_analysis','=',False)]}"/>
+                </xpath>
+                <div name='time_unit' position="replace">
+                    <div name='time_unit' attrs="{'invisible': [('module_account_analytic_analysis','=',False)],'required':[('module_account_analytic_analysis','=',True)]}">
+                        <label for="time_unit"/>
+                        <field name="time_unit" domain="[('category_id.name','=','Working Time')]" class="oe_inline"/>
+                    </div>
+                </div> 
             </field>
         </record>
 

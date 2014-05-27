@@ -81,8 +81,7 @@ class sale_configuration(osv.osv_memory):
 
         default_picking_policy = 'one' if wizard.default_picking_policy else 'direct'
         ir_values.set_default(cr, SUPERUSER_ID, 'sale.order', 'picking_policy', default_picking_policy)
-        res = super(sale_configuration, self).set_sale_defaults(cr, uid, ids, context)
-        return res
+        return {}
 
     def onchange_invoice_methods(self, cr, uid, ids, group_invoice_so_lines, group_invoice_deli_orders, context=None):
         if not group_invoice_deli_orders:

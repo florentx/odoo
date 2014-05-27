@@ -55,12 +55,6 @@
                      <field name="group_invoice_so_lines" position="replace">
                          <field name="group_invoice_so_lines" on_change="onchange_invoice_methods(group_invoice_so_lines, group_invoice_deli_orders)" class="oe_inline"/>
                      </field>
-                     <xpath expr="//div[@name='time_unit']" position="replace">
-                         <div attrs="{'invisible': [('task_work','=',False), ('module_account_analytic_analysis','=',False)],'required': ['|', ('task_work','=',True), ('module_account_analytic_analysis','=',True)]}">
-                             <label for="time_unit"/>
-                             <field name="time_unit" domain="[('category_id.name','=','Working Time')]" class="oe_inline"/>
-                         </div>
-                     </xpath>
                      <xpath expr="//div[@name='Sale Features']" position="inside">
                          <div>
                               <field name="group_route_so_lines" class="oe_inline"/>
