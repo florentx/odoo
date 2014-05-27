@@ -9,6 +9,22 @@ openerp.report = function(instance) {
             error: c.rpc_error.bind(c)
         });
     }
+    var show_pdf = function(session, response, c, options, self) {
+        response.push("pdf_viewer")
+        session.show_pdf({
+            url: '/report/download',
+            data: {data: JSON.stringify(response)},
+            complete: function(){
+                openerp.web.unblockUI();
+                if (!self.dialog) {
+                    options.on_close();
+                }
+                self.dialog_stop();
+                window.scrollTo(0,0);
+            },
+            error: c.rpc_error.bind(c)
+        });
+    }
 
     instance.web.ActionManager = instance.web.ActionManager.extend({
         ir_actions_report_xml: function(action, options) {
@@ -76,7 +92,12 @@ openerp.report = function(instance) {
      target="_blank">wkhtmltopdf.org</a>'), true);
                                 }
                             }
-                            return trigger_download(self.session, response, c);
+                            if(action.hasOwnProperty('pdf_viewer')){
+                                return show_pdf(self.session, response, c, options, self);
+                            }
+                            else {
+                                return trigger_download(self.session, response, c );
+                            }
                         });
                     } else if (action.report_type == 'controller') {
                         return trigger_download(self.session, response, c);
