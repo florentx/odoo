@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
@@ -22,36 +21,15 @@
 
 from openerp.osv import fields, osv
 from openerp import tools
+from openerp.addons.crm import crm
 
 class project_issue_report(osv.osv):
-    _name = "project.issue.report"
+    _inherit = "project.issue.report"
     _auto = False
 
     _columns = {
-        'name': fields.char('Year', size=64, required=False, readonly=True),
-        'month':fields.selection(fields.date.MONTHS, 'Month', readonly=True),
-        'company_id': fields.many2one('res.company', 'Company', readonly=True),
-        'day': fields.char('Day', size=128, readonly=True),
-        'opening_date': fields.date('Date of Opening', readonly=True),
-        'creation_date': fields.date('Creation Date', readonly=True),
-        'date_closed': fields.date('Date of Closing', readonly=True),
-        'date_last_stage_update': fields.date('Last Stage Update', readonly=True),
-        'stage_id': fields.many2one('project.task.type', 'Stage'),
-        'nbr': fields.integer('# of Issues', readonly=True),
-        'working_hours_open': fields.float('Avg. Working Hours to Open', readonly=True, group_operator="avg"),
-        'working_hours_close': fields.float('Avg. Working Hours to Close', readonly=True, group_operator="avg"),
-        'delay_open': fields.float('Avg. Delay to Open', digits=(16,2), readonly=True, group_operator="avg",
-                                       help="Number of Days to open the project issue."),
-        'delay_close': fields.float('Avg. Delay to Close', digits=(16,2), readonly=True, group_operator="avg",
-                                       help="Number of Days to close the project issue"),
-        'company_id' : fields.many2one('res.company', 'Company'),
-        'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority'),
-        'project_id':fields.many2one('project.project', 'Project',readonly=True),
-        'version_id': fields.many2one('project.issue.version', 'Version'),
-        'user_id' : fields.many2one('res.users', 'Assigned to',readonly=True),
-        'partner_id': fields.many2one('res.partner','Contact'),
-        'task_id': fields.many2one('project.task', 'Task'),
-        'email': fields.integer('# Emails', size=128, readonly=True),
+        'section_id':fields.many2one('crm.case.section', 'Sale Team', readonly=True),
+        'channel_id': fields.many2one('crm.case.channel', 'Channel',readonly=True),
     }
 
     def init(self, cr):
@@ -69,6 +47,7 @@ class project_issue_report(osv.osv):
                     c.user_id,
                     c.working_hours_open,
                     c.working_hours_close,
+                    c.section_id,
                     c.stage_id,
                     to_char(c.date_closed, 'YYYY-mm-dd') as date_closed,
                     c.company_id as company_id,
@@ -77,6 +56,7 @@ class project_issue_report(osv.osv):
                     c.version_id as version_id,
                     1 as nbr,
                     c.partner_id,
+                    c.channel_id,
                     c.task_id,
                     date_trunc('day',c.create_date) as create_date,
                     c.day_open as delay_open,

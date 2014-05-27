@@ -23,7 +23,6 @@ from datetime import datetime
 
 from openerp import SUPERUSER_ID
 from openerp import tools
-from openerp.addons.crm import crm
 from openerp.osv import fields, osv, orm
 from openerp.tools import html2plaintext
 from openerp.tools.translate import _
@@ -239,9 +238,6 @@ class project_issue(osv.Model):
         'days_since_creation': fields.function(_compute_day, string='Days since creation date', \
                                                multi='compute_day', type="integer", help="Difference in days between creation date and current date"),
         'date_deadline': fields.date('Deadline'),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team', \
-                        select=True, help='Sales team to which Case belongs to.\
-                             Define Responsible user and Email account for mail gateway.'),
         'partner_id': fields.many2one('res.partner', 'Contact', select=1),
         'company_id': fields.many2one('res.company', 'Company'),
         'description': fields.text('Private Note'),
@@ -259,7 +255,6 @@ class project_issue(osv.Model):
         'date_closed': fields.datetime('Closed', readonly=True,select=True),
         'date': fields.datetime('Date'),
         'date_last_stage_update': fields.datetime('Last Stage Update', select=True),
-        'channel_id': fields.many2one('crm.case.channel', 'Channel', help="Communication channel."),
         'categ_ids': fields.many2many('project.category', string='Tags'),
         'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority', select=True),
         'version_id': fields.many2one('project.issue.version', 'Version'),
@@ -295,7 +290,7 @@ class project_issue(osv.Model):
     _defaults = {
         'active': 1,
         'stage_id': lambda s, cr, uid, c: s._get_default_stage_id(cr, uid, c),
-        'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'crm.helpdesk', context=c),
+        'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'project.project', context=c),
         'priority': '1',
         'kanban_state': 'normal',
         'date_last_stage_update': fields.datetime.now,
@@ -362,29 +357,30 @@ class project_issue(osv.Model):
     # -------------------------------------------------------
     # Stage management
     # -------------------------------------------------------
-
-    def stage_find(self, cr, uid, cases, section_id, domain=[], order='sequence', context=None):
+    
+    def stage_find(self, cr, uid, cases, proj_id, domain=[], order='sequence', context=None):
         """ Override of the base.stage method
             Parameter of the stage search taken from the issue:
             - type: stage type must be the same or 'both'
-            - section_id: if set, stages must belong to this section or
+            - proj_id: if set, stages must belong to this projects or
               be a default case
         """
         if isinstance(cases, (int, long)):
             cases = self.browse(cr, uid, cases, context=context)
-        # collect all section_ids
-        section_ids = []
-        if section_id:
-            section_ids.append(section_id)
+        # collect all proj_ids
+        proj_ids = []
+        if proj_id:
+            
+            proj_ids.append(proj_id)
         for task in cases:
             if task.project_id:
-                section_ids.append(task.project_id.id)
-        # OR all section_ids and OR with case_default
+                proj_ids.append(task.project_id.id)
+        # OR all proj_ids and OR with case_default
         search_domain = []
-        if section_ids:
-            search_domain += [('|')] * (len(section_ids)-1)
-            for section_id in section_ids:
-                search_domain.append(('project_ids', '=', section_id))
+        if proj_ids:
+            search_domain += [('|')] * (len(proj_ids)-1)
+            for proj_id in proj_ids:
+                search_domain.append(('project_ids', '=', proj_id))
         search_domain += list(domain)
         # perform search, return the first found
         stage_ids = self.pool.get('project.task.type').search(cr, uid, search_domain, order=order, context=context)

@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Issues -->
+        <record id="project_issue.issue_buginaccountsmodule0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_programnotgivingproperoutput0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_outputincorrect0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_problemloadingpage0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_pagenotfound0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_programmingerror0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_logicalerrorinprogram0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_constrainterror0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_patcheserrorinprogram0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_newfeaturestobeadded0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_addmenustothemodule0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_includeattendancesheetinproject0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_createnewobject0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_improvereportsinhrms0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+
+        <record id="project_issue.issue_improvereportsinpms0" model="project.issue">
+            <field name="section_id" ref="sales_team.section_sales_department"/>
+        </record>
+    </data>
+</openerp>

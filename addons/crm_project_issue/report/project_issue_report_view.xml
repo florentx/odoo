@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		<record id="view_project_issue_report_filter_crm" model="ir.ui.view">
+            <field name="name">project.issue.report.select</field>
+            <field name="model">project.issue.report</field>
+            <field name="inherit_id" ref="project_issue.view_project_issue_report_filter"/>
+            <field name="arch" type="xml">
+	            <xpath expr="//search/group/filter[@string='Contact']" position="after">
+	                <filter string="Sale Team" icon="terp-personal+" domain="[]" context="{'group_by':'section_id'}" groups="base.group_multi_salesteams"/>
+	           	</xpath>
+            </field>
+        </record>
+	</data>
+</openerp>
