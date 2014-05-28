@@ -11,7 +11,10 @@
                     <field name="iso_code"/>
                     <field name="direction"/>
                     <field name="translatable"/>
-                    <field name="active"/>
+                    <field name="no_of_user"/>
+                    <field name="active" invisible="1"/>
+                    <button name="set_deactive" help="Active" attrs="{'invisible': [('active', '=', False)]}" type="object" icon="gtk-yes"/>
+                    <button name="set_active" help="Deactive" attrs="{'invisible': [('active', '=', True)]}" type="object" icon="gtk-no"/>
                     <button name="%(base.action_wizard_update_translations)d"
                     string="Update Terms" type="action" icon="gtk-ok" help="Update Languague Terms"/>
                 </tree>
@@ -38,6 +41,7 @@
                         <newline/>
                         <field name="active" />
                         <field name="translatable"/>
+                        <field name="no_of_user"/>
                     </group>
                     <separator colspan="4" string="Legends for Date and Time Formats"/>
                     <group col="4" colspan="4">

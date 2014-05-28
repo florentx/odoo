@@ -49,6 +49,7 @@ class base_language_install(osv.osv_memory):
                 context = {'overwrite': True}
             modobj.update_translations(cr, uid, mids, lang, context or {})
             self.write(cr, uid, ids, {'state': 'done'}, context=context)
+            self.pool.get('res.users').write(cr, uid, uid, {'lang': lang})
         return {
             'name': _('Language Pack'),
             'view_type': 'form',
@@ -60,6 +61,11 @@ class base_language_install(osv.osv_memory):
             'type': 'ir.actions.act_window',
             'target': 'new',
             'res_id': ids and ids[0] or False,
+        }
+    def reload_lang(self, cr, uid, ids, context=None):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
         }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

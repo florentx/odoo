@@ -79,7 +79,6 @@ class lang(osv.osv):
         if not lang_name:
             lang_name = tools.ALL_LANGUAGES.get(lang, lang)
 
-
         def fix_xa0(s):
             """Fix badly-encoded non-breaking space Unicode character from locale.localeconv(),
                coercing to utf-8, as some platform seem to output localeconv() in their system
@@ -122,12 +121,25 @@ class lang(osv.osv):
                     or (lang.date_format and pattern in lang.date_format):
                     return False
         return True
+        
+    def _check_active_lang(self, cr, uid, ids, context=None):
+        lang_ids = self.search(cr, uid, [('active', '=', True)])
+        if len(lang_ids) < 1:
+            return False
+        return True
 
     def _get_default_date_format(self, cursor, user, context=None):
         return '%m/%d/%Y'
 
     def _get_default_time_format(self, cursor, user, context=None):
         return '%H:%M:%S'
+        
+    def _no_of_user(self, cr, uid, ids, name, args, context=None):
+        res = {}
+        for lang in self.browse(cr, uid, ids, context=context):
+            user = len(self.pool.get('res.users').search(cr, uid, [('lang', '=', lang.code)]))
+            res[lang.id] = user
+        return res
 
     _columns = {
         'name': fields.char('Name', size=64, required=True),
@@ -141,6 +153,7 @@ class lang(osv.osv):
         'grouping':fields.char('Separator Format',size=64,required=True,help="The Separator Format should be like [,n] where 0 < n :starting from Unit digit.-1 will end the separation. e.g. [3,2,-1] will represent 106500 to be 1,06,500;[1,2,-1] will represent it to be 106,50,0;[3] will represent it as 106,500. Provided ',' as the thousand separator in each case."),
         'decimal_point':fields.char('Decimal Separator', size=64,required=True),
         'thousands_sep':fields.char('Thousands Separator',size=64),
+        'no_of_user': fields.function(_no_of_user, string="Number of user",help='Number of user for this language.', type='integer'),
     }
     _defaults = {
         'active': 1,
@@ -158,7 +171,8 @@ class lang(osv.osv):
     ]
 
     _constraints = [
-        (_check_format, 'Invalid date/time format directive specified. Please refer to the list of allowed directives, displayed when you edit a language.', ['time_format', 'date_format'])
+        (_check_format, 'Invalid date/time format directive specified. Please refer to the list of allowed directives, displayed when you edit a language.', ['time_format', 'date_format']),
+        (_check_active_lang, 'Atleast one language should be enabled.', ['active'])
     ]
 
     @tools.ormcache(skiparg=3)
@@ -173,11 +187,27 @@ class lang(osv.osv):
         decimal_point = lang_obj.decimal_point
         grouping = lang_obj.grouping
         return grouping, thousands_sep, decimal_point
-
+        
+    def send_notification(self, cr, uid, ids, context=None):
+        user_obj = self.pool.get('res.users')
+        for rec in self.browse(cr, uid, ids, context=context):
+            user_ids = user_obj.search(cr, uid, [('lang', '=', rec['code'])])
+            email_from = user_obj.browse(cr, uid, uid, context=context)
+            for uids in user_ids:
+                user = user_obj.browse(cr, uid, uids, context=context)
+                subject = 'Language notification'
+                body = _('Dear %s,\n %s Langague is no more supported, edited by %s in database "%s".')% (user.name, rec['name'], email_from.name, cr.dbname)
+                tools.email_send(email_from.email, [user.email], subject, body)
+        return True
+        
     def write(self, cr, uid, ids, vals, context=None):
         for lang_id in ids :
             self._lang_data_get.clear_cache(self)
-        return super(lang, self).write(cr, uid, ids, vals, context)
+        return_value = super(lang, self).write(cr, uid, ids, vals, context)
+        lang_status = vals.get('active')
+        if not lang_status and isinstance(lang_status, bool):
+            self.send_notification(cr, uid, ids, context=context)
+        return return_value
 
     def unlink(self, cr, uid, ids, context=None):
         if context is None:
@@ -195,6 +225,22 @@ class lang(osv.osv):
             trans_ids = trans_obj.search(cr, uid, [('lang','=',language['code'])], context=context)
             trans_obj.unlink(cr, uid, trans_ids, context=context)
         return super(lang, self).unlink(cr, uid, ids, context=context)
+
+    def check_single_lang_enable(self, cr, uid, context=None):
+        ids = self.search(cr, uid, [('active','=',True)], context=context)
+        return True if len(ids) == 1 else False
+
+    def set_deactive(self, cr, uid, ids, context=None):
+        lang = self.read(cr, uid, ids, ['code'], context=context)[0]
+        user_lang = self.pool.get('res.users').read(cr, uid, uid, ['lang'], context=context)
+        if lang['code'] == user_lang['lang']:
+            raise osv.except_osv(_('Error!'), _("You cannot deactivate your preferred language. If you still want to deactivate, kindly change it from your user preferences."))
+        self.write(cr, uid, ids, { 'active': False}, context=context)
+        return True
+        
+    def set_active(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, { 'active': True}, context=context)
+        return True
 
     #
     # IDS: can be a list of IDS or a list of XML_IDS
