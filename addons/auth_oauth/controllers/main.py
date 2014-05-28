@@ -67,10 +67,13 @@ class OAuthLogin(openerp.addons.web.controllers.main.Home):
         return providers
 
     def get_state(self, provider):
+        url_redirect = request.httprequest.base_url
+        if request.httprequest.query_string:
+            url_redirect += '?' + request.httprequest.query_string
         state = dict(
             d=request.session.db,
             p=provider['id'],
-            r=request.httprequest.full_path
+            r=url_redirect
         )
         token = request.params.get('token')
         if token:
