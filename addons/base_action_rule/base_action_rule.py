@@ -174,7 +174,8 @@ class base_action_rule(osv.osv):
 
             # check postconditions, and execute actions on the records that satisfy them
             for action in self.browse(cr, uid, action_ids, context=context):
-                if self._filter(cr, uid, action, action.domain, [new_id], context=context):
+                domain = action.domain or action.filter_id.domain
+                if self._filter(cr, uid, action, domain, [new_id], context=context):
                     self._process(cr, uid, action, [new_id], context=context)
             return new_id
 
@@ -200,13 +201,15 @@ class base_action_rule(osv.osv):
             # check preconditions
             pre_ids = {}
             for action in actions:
-                pre_ids[action] = self._filter(cr, uid, action, action.pre_domain, ids, context=context)
+                pre_domain = action.pre_domain or action.filter_pre_id.domain
+                pre_ids[action] = self._filter(cr, uid, action, pre_domain, ids, context=context)
             # execute write
             old_write(cr, uid, ids, vals, context=context)
 
             # check postconditions, and execute actions on the records that satisfy them
             for action in actions:
-                post_ids = self._filter(cr, uid, action, action.domain, pre_ids[action], context=context)
+                domain = action.domain or action.filter_id.domain
+                post_ids = self._filter(cr, uid, action, domain, pre_ids[action], context=context)
                 if post_ids:
                     self._process(cr, uid, action, post_ids, context=context)
             return True

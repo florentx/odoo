@@ -2,12 +2,6 @@
 <openerp>
     <data noupdate="1">
         <!-- demo automated actions add messge on new lead after 5 days -->
-        <record id="filter_draft_lead" model="ir.filters">
-            <field name="name">Draft Leads</field>
-            <field name="model_id">crm.lead</field>
-            <field name="domain">[('stage_id.sequence', '=', 1)]</field>
-            <field name="user_id" eval="False"/>
-        </record>
         <record id="action_email_reminder_lead" model="ir.actions.server">
             <field name="name">Reminder to User</field>
             <field name="model_id" ref="model_crm_lead"/>
@@ -21,7 +15,7 @@
             <field name="model_id" ref="model_crm_lead"/>
             <field name="sequence">1</field>
             <field name="kind">on_time</field>
-            <field name="domain" eval="[('id', 'in', [ref('crm_case_1')])]"/>
+            <field name="domain">[('stage_id.sequence', '=', 1)]</field>
             <field name="trg_date_id" ref="field_crm_lead_create_date"/>
             <field name="trg_date_range">5</field>
             <field name="trg_date_range_type">day</field>
@@ -29,12 +23,6 @@
         </record>
 
         <!-- demo automated actions add a followers on urgent USA leads -->
-        <record id="filter_usa_lead" model="ir.filters">
-            <field name="name">Leads from USA</field>
-            <field name="model_id">crm.lead</field>
-            <field name="domain">[('country_id','=','United States')]</field>
-            <field name="user_id" eval="False"/>
-        </record>
         <record id="action_set_team_sales_department" model="ir.actions.server">
             <field name="name">Set team to Sales Department</field>
             <field name="model_id" ref="model_crm_lead"/>
@@ -50,7 +38,7 @@ object.write({'section_id': sales_team.id})
             <field name="model_id" ref="model_crm_lead"/>
             <field name="sequence">2</field>
             <field name="kind">on_create</field>
-            <field name="domain" eval="[('id', 'in', [ref('crm_case_3')])]"/>
+            <field name="domain">[('country_id','=','United States')]</field>
             <field name="act_user_id" ref="base.user_root"/>
             <field name="act_followers" eval="[(6,0,[ref('base.res_partner_4'), ref('base.res_partner_5'), ref('base.res_partner_6')])]"/>
             <field name="server_action_ids" eval="[(6,0,[ref('action_set_team_sales_department')])]"/>
