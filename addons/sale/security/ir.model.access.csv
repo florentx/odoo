@@ -46,3 +46,4 @@ access_product_price_history_account_user,prices.history account user,product.mo
 access_product_price_history_sale_use,prices.history sale use,product.model_product_price_history,base.group_sale_salesman,1,0,0,0
 access_sale_order_invoicing_payments,sale.order,model_sale_order,account.group_account_invoice,1,1,0,0
 access_sale_order_line_invoicing_payments,sale.order.line,model_sale_order_line,account.group_account_invoice,1,1,0,0
+access_procurement_order_invoicing_payment,procurement.order,model_procurement_order,account.group_account_invoice,1,1,1,0
