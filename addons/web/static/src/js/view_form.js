@@ -2614,7 +2614,7 @@ instance.web.form.FieldCharDomain = instance.web.form.AbstractField.extend(insta
                 });
             }
             else {
-                var domain = ["id", "in", element_ids];
+                var domain = [["id", "in", element_ids]];
                 var domain_done = $.Deferred().resolve(domain);
             }
             $.when(domain_done).then(function (domain) {
