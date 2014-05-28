@@ -20,6 +20,7 @@
 ##############################################################################
 
 import time
+from datetime import datetime, date, timedelta
 from lxml import etree
 import openerp.addons.decimal_precision as dp
 import openerp.exceptions
@@ -46,6 +47,8 @@ class account_invoice(osv.osv):
     def _get_journal(self, cr, uid, context=None):
         if context is None:
             context = {}
+        if context.get('default_journal_id'):
+            return context.get('default_journal_id')
         type_inv = context.get('type', 'out_invoice')
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company_id = context.get('company_id', user.company_id.id)
@@ -340,9 +343,6 @@ class account_invoice(osv.osv):
         ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
     ]
 
-
-
-
     def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
         journal_obj = self.pool.get('account.journal')
         if context is None:
@@ -577,7 +577,8 @@ class account_invoice(osv.osv):
     def onchange_company_id(self, cr, uid, ids, company_id, part_id, type, invoice_line, currency_id, context=None):
         #TODO: add the missing context parameter when forward-porting in trunk so we can remove
         #      this hack!
-        context = self.pool['res.users'].context_get(cr, uid)
+        if not context:
+            context = self.pool['res.users'].context_get(cr, uid)
 
         val = {}
         dom = {}
@@ -645,6 +646,8 @@ class account_invoice(osv.osv):
             journal_ids = obj_journal.search(cr, uid, [('company_id','=',company_id), ('type', '=', journal_type)])
             if journal_ids:
                 val['journal_id'] = journal_ids[0]
+                if context.get('default_journal_id') in journal_ids:
+                    val['journal_id'] = context.get('default_journal_id')
             ir_values_obj = self.pool.get('ir.values')
             res_journal_default = ir_values_obj.get(cr, uid, 'default', 'type=%s' % (type), ['account.invoice'])
             for r in res_journal_default:

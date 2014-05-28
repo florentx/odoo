@@ -47,5 +47,13 @@ Thank you in advance for your cooperation.
 Best Regards,'''
     }
 
-
+    def _company_default_get(self, cr, uid, object=False, field=False, context=None):
+        """ Check if the default_journal_id sent in the context to set default value of journal then 
+        avoid to set default company as it will set company_id from onchange_journal_id """
+        if not context:
+            context = {}
+        company_id = super(res_company, self)._company_default_get(cr, uid, object=object, field=field, context=context)
+        if context.get('default_journal_id') and object == 'account.invoice':
+            company_id = False
+        return company_id
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
