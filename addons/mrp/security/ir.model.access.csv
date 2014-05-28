@@ -76,3 +76,12 @@ access_mrp_property_group,mrp.property.group,model_mrp_property_group,stock.grou
 access_mrp_property,mrp.property,model_mrp_property,stock.group_stock_manager,1,1,1,1
 access_mrp_property_group,mrp.property.group,model_mrp_property_group,base.group_user,1,0,0,0
 access_mrp_property,mrp.property,model_mrp_property,base.group_user,1,0,0,0
+access_mrp_bom_invoicing_payment,mrp.bom,model_mrp_bom,account.group_account_invoice,1,0,0,0
+access_mrp_production_invoicing_payment,mrp.production,model_mrp_production,account.group_account_invoice,1,1,1,0
+access_mrp_production_product_line_invoicing_payment,mrp.production.product.line,model_mrp_production_product_line,account.group_account_invoice,1,1,1,0
+access_workcenter_invoicing_payment,mrp.production.workcenter.line,model_mrp_production_workcenter_line,account.group_account_invoice,1,1,1,0
+access_mrp_routing_invoicing_payment,mrp.routing,model_mrp_routing,account.group_account_invoice,1,0,0,0
+access_mrp_routing_workcenter_invoicing_payment,mrp.routing.workcenter,model_mrp_routing_workcenter,account.group_account_invoice,1,0,0,0
+access_mrp_workcenter_invoicing_payment,mrp.workcenter,model_mrp_workcenter,account.group_account_invoice,1,0,0,0
+access_resource_calendar_invoicing_payment,resource.calendar,resource.model_resource_calendar,account.group_account_invoice,1,0,0,0
+access_resource_calendar_attendance_invoicing_payment,mrp.resource.calendar.attendance,resource.model_resource_calendar_attendance,account.group_account_invoice,1,0,0,0
