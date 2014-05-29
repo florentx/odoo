@@ -51,8 +51,8 @@
             <field name="view_type">form</field>
             <field name="search_view_id" ref="product.product_search_form_view"/>
             <field name="view_id" ref="product.product_kanban_view"/>
-            <field name="context">{'default_type':'service','default_procure_method':'make_to_order','default_supply_method':'produce','default_sale_ok':True,'default_purchase_ok':False,'consumable_services':True}</field>
-            <field name="domain">[('type','=','service'),('procure_method','=','make_to_order'),('supply_method','=','produce'),('sale_ok','=',True)]</field>
+            <field name="context">{'default_type':'service','default_auto_create_task':True,'default_sale_ok':True,'default_purchase_ok':False,'consumable_services':True}</field>
+            <field name="domain">[('type','=','service'),('auto_create_task','=',True),('sale_ok','=',True)]</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to define a new service.
