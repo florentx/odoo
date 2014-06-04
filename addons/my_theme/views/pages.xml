@@ -2,16 +2,15 @@
 <openerp>
  <data>
   <template id="website.homepage" name="Homepage" page="True">
-   <t t-call="website.layout">
-    <div id="wrap" class="oe_structure">
-    <section>
-     <div class="container">
-      <h1> Hello, World!
-      </h1>
-     </div>
-    </section>
-    </div>
-   </t>
+   <html>
+    <head>
+     <title>Title</title>
+    </head>
+    <body>
+     <h1> Hello, World!
+     </h1>
+    </body>
+   </html>
   </template>
  </data>
 </openerp>
