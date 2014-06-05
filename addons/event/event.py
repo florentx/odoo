@@ -528,7 +528,7 @@ class event_reminder(osv.osv):
                     for subs in event.attendee_ids:
                         time_to_send = datetime.max
                         if not subs.reminder_sended:
-                            time_to_send = datetime.strptime(subs.create_date, '%Y-%m-%d') + timedelta(days=self._get_number_days(reminder))
+                            time_to_send = datetime.strptime(subs.create_date, "%Y-%m-%d %H:%M:%S") + timedelta(days=self._get_number_days(reminder))
                             if time_to_send < datetime.now():
                                 self.pool.get('event.event').send_reminder_mail(cr, uid, event.id, reminder.email_template.id, context=context)
                                 self.pool.get('event.registration_attendee').write(cr, uid, [subs.id], {'reminder_sended': True}, context=context)
